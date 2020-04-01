@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  JoinColumn,
+  Column
+} from 'typeorm';
+import { UserRole } from './UserRole';
+import { Department } from './Department';
+import { Post } from './Post';
 
 @Entity()
 export class User {
@@ -6,14 +15,26 @@ export class User {
   id: number;
 
   @Column()
-  name: string;
+  userId: string;
 
   @Column()
-  email: string;
+  userName: string;
+
+  @Column()
+  userAvatar: string;
 
   @Column()
   pwdHash: string;
 
-  @Column()
-  role: string;
+  @OneToOne(type => UserRole)
+  @JoinColumn()
+  role: UserRole;
+
+  @OneToOne(type => Post)
+  @JoinColumn()
+  post: Post;
+
+  @OneToOne(type => Department)
+  @JoinColumn()
+  department: Department;
 }
