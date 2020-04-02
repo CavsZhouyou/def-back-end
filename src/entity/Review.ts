@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { User } from './User';
 import { ReviewStatus } from './ReviewStatus';
+import { Publish } from './Publish';
 
 @Entity()
 export class Review {
@@ -34,5 +35,9 @@ export class Review {
   @JoinColumn()
   reviewStatus: ReviewStatus;
 
-  // publishId
+  @OneToOne(
+    type => Publish,
+    publish => publish.review
+  )
+  publish: Publish;
 }

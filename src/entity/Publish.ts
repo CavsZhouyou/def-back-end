@@ -2,6 +2,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToOne,
+  ManyToOne,
   JoinColumn,
   Column
 } from 'typeorm';
@@ -10,6 +11,8 @@ import { PublishStatus } from './PublishStatus';
 import { PublishType } from './PublishType';
 import { User } from './User';
 import { Log } from './Log';
+import { Iteration } from './Iteration';
+import { Review } from './Review';
 
 @Entity()
 export class Publish {
@@ -26,7 +29,8 @@ export class Publish {
     type => Log,
     log => log.publish
   )
-  logData: Log;
+  @JoinColumn()
+  log: Log;
 
   @OneToOne(type => PublishEnvironment)
   @JoinColumn()
@@ -40,9 +44,22 @@ export class Publish {
   @JoinColumn()
   publishType: PublishType;
 
-  @OneToOne(type => User)
-  @JoinColumn()
-  publisherId: User;
+  @ManyToOne(
+    type => User,
+    user => user.createdPublishes
+  )
+  publisher: User;
 
-  // iterationId
+  @OneToOne(
+    type => Review,
+    review => review.publish
+  )
+  @JoinColumn()
+  review: Review;
+
+  @ManyToOne(
+    type => Iteration,
+    iteration => iteration.publishes
+  )
+  iteration: Iteration;
 }

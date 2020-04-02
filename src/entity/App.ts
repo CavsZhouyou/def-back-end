@@ -3,14 +3,17 @@ import {
   PrimaryGeneratedColumn,
   OneToMany,
   OneToOne,
+  ManyToOne,
   JoinColumn,
   Column
 } from 'typeorm';
+import { User } from './User';
+import { Member } from './Member';
+import { Dynamic } from './Dynamic';
+import { Iteration } from './Iteration';
 import { PublishType } from './PublishType';
 import { ProductType } from './ProductType';
-import { User } from './User';
 import { CodeReviewSetting } from './CodeReviewSetting';
-import { Dynamic } from './Dynamic';
 
 @Entity()
 export class App {
@@ -25,9 +28,6 @@ export class App {
 
   @Column()
   appLogo: string;
-
-  @Column()
-  role: string;
 
   @Column()
   repository: string;
@@ -46,10 +46,6 @@ export class App {
   @JoinColumn()
   productType: ProductType;
 
-  @OneToOne(type => User)
-  @JoinColumn()
-  creator: User;
-
   @OneToOne(type => CodeReviewSetting)
   @JoinColumn()
   codeReviewSetting: CodeReviewSetting;
@@ -59,4 +55,22 @@ export class App {
     dynamic => dynamic.app
   )
   dynamics: Dynamic[];
+
+  @OneToMany(
+    type => Member,
+    member => member.app
+  )
+  members: Member[];
+
+  @OneToMany(
+    type => Iteration,
+    iteration => iteration.app
+  )
+  iterations: Iteration[];
+
+  @ManyToOne(
+    type => User,
+    user => user.createdApps
+  )
+  creator: User;
 }

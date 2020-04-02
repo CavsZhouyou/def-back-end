@@ -14,8 +14,6 @@ export class Dynamic {
   @PrimaryGeneratedColumn()
   dynamicId: number;
 
-  //创建者 一对多 动态
-
   @Column()
   content: string;
 

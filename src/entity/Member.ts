@@ -2,10 +2,13 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToOne,
+  ManyToOne,
   JoinColumn,
   Column
 } from 'typeorm';
 import { MemberRole } from './MemberRole';
+import { App } from './App';
+import { User } from './User';
 
 @Entity()
 export class Member {
@@ -18,11 +21,19 @@ export class Member {
   @Column()
   expiredTime: string;
 
-  // 仓库 一对多 成员
-
-  // 成员 一对一 用户
-
   @OneToOne(type => MemberRole)
   @JoinColumn()
   role: MemberRole;
+
+  @ManyToOne(
+    type => User,
+    user => user.joinedApps
+  )
+  user: User;
+
+  @ManyToOne(
+    type => App,
+    app => app.members
+  )
+  app: App;
 }

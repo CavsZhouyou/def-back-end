@@ -1,10 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToOne,
-  JoinColumn
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
 import { Publish } from './Publish';
 
 @Entity()
@@ -17,8 +11,7 @@ export class Log {
 
   @OneToOne(
     type => Publish,
-    publish => publish.logData
+    publish => publish.log
   )
-  @JoinColumn()
   publish: Publish;
 }

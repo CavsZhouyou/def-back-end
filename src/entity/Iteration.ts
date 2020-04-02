@@ -2,11 +2,15 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToOne,
+  OneToMany,
+  ManyToOne,
   JoinColumn,
   Column
 } from 'typeorm';
 import { IterationStatus } from './IterationStatus';
 import { User } from './User';
+import { Publish } from './Publish';
+import { App } from './App';
 
 @Entity()
 export class Iteration {
@@ -38,11 +42,21 @@ export class Iteration {
   @JoinColumn()
   iterationStatus: IterationStatus;
 
-  @OneToOne(type => User)
-  @JoinColumn()
+  @ManyToOne(
+    type => User,
+    user => user.createdIterations
+  )
   creator: User;
 
-  // latestPublish
+  @OneToMany(
+    type => Publish,
+    publish => publish.iteration
+  )
+  publishes: Publish[];
 
-  // appId
+  @ManyToOne(
+    type => App,
+    app => app.iterations
+  )
+  app: App;
 }
