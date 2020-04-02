@@ -3,6 +3,7 @@ import { createConnection } from 'typeorm';
 import app from '@server';
 import logger from '@shared/Logger';
 import { initRepository } from '@shared/repositories';
+import initDatabase from './initDatabase';
 
 createConnection()
   .then(async connection => {
@@ -14,5 +15,7 @@ createConnection()
     app.listen(port, () => {
       logger.info('Express server started on port: ' + port);
     });
+
+    // await initDatabase(connection.manager);
   })
   .catch(error => console.log(error));
