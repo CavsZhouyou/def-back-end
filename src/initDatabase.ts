@@ -16,6 +16,9 @@ import { PublishEnvironment } from '@entity/PublishEnvironment';
 import { ReviewStatus } from '@entity/ReviewStatus';
 import { ReviewerScopeType } from '@entity/ReviewerScopeType';
 import { UserRole } from '@entity/UserRole';
+import { Department } from '@entity/Department';
+import { Post } from '@entity/Post';
+import { User } from '@entity/User';
 
 const publishTypes = [
   {
@@ -157,6 +160,69 @@ const reviewerScopeTypes = [
   }
 ];
 
+const departments = [
+  {
+    name: '淘系技术部 - 躺平',
+    value: '9001'
+  },
+  {
+    name: '淘系技术部 - 闲鱼',
+    value: '9002'
+  },
+  {
+    name: '淘系技术部 - 村淘',
+    value: '9003'
+  },
+  {
+    name: '淘系技术部 - 天猫',
+    value: '9004'
+  }
+];
+
+const posts = [
+  {
+    name: '实习前端工程师',
+    value: '11001'
+  },
+  {
+    name: '前端工程师',
+    value: '11002'
+  },
+  {
+    name: '高级前端工程师',
+    value: '11003'
+  },
+  {
+    name: '前端专家',
+    value: '11004'
+  },
+  {
+    name: '高级前端专家',
+    value: '11005'
+  },
+  {
+    name: '资深前端专家',
+    value: '11006'
+  },
+  {
+    name: '研究员',
+    value: '11007'
+  }
+];
+
+const users = [
+  {
+    userId: '223035',
+    userName: '晓天',
+    userAvatar:
+      'http://hd215.api.yesapi.cn/?s=Ext.Avatar.Show&nickname=%E6%99%93%E5%A4%A9&size=500&app_key=4C389AC422864EB57101E24648435351&sign=BCF78D4C895E4054AC0B231BD1DD0524',
+    pwdHash: '$2b$12$1mE2OI9hMS/rgH9Mi0s85OM2V5gzm7aF3gJIWH1y0S1MqVBueyjsy',
+    roleId: '6002',
+    postId: '11001',
+    departmentId: '9001'
+  }
+];
+
 export default async function initDatabase(manager: any) {
   publishTypes.forEach(async item => {
     const { value, name } = item;
@@ -253,6 +319,53 @@ export default async function initDatabase(manager: any) {
       manager.create(ReviewerScopeType, {
         code: value,
         name
+      })
+    );
+  });
+
+  departments.forEach(async item => {
+    const { value, name } = item;
+
+    await manager.save(
+      manager.create(Department, {
+        departmentId: value,
+        departmentName: name
+      })
+    );
+  });
+
+  posts.forEach(async item => {
+    const { value, name } = item;
+
+    await manager.save(
+      manager.create(Post, {
+        postId: value,
+        postName: name
+      })
+    );
+  });
+
+  users.forEach(async item => {
+    const { roleId, postId, departmentId } = item;
+
+    const role = await manager.findOne(UserRole, {
+      roleId
+    });
+
+    const department = await manager.findOne(Department, {
+      departmentId
+    });
+
+    const post = await manager.findOne(Post, {
+      postId
+    });
+
+    await manager.save(
+      manager.create(User, {
+        ...item,
+        role,
+        department,
+        post
       })
     );
   });

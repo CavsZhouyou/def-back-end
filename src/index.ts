@@ -10,12 +10,12 @@ createConnection()
     // init repositories
     initRepository();
 
+    // await initDatabase(connection.manager);
+
     // Start the server
     const port = Number(process.env.PORT || 4000);
     app.listen(port, () => {
       logger.info('Express server started on port: ' + port);
     });
-
-    // await initDatabase(connection.manager);
   })
   .catch(error => console.log(error));
