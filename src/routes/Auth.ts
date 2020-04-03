@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
-import { getRepository } from 'typeorm';
-import { Request, Response, Router, NextFunction } from 'express';
+import { Request, Response, Router } from 'express';
 import { BAD_REQUEST, OK, UNAUTHORIZED } from 'http-status-codes';
 
 import { JwtService } from '@shared/JwtService';
@@ -19,38 +18,46 @@ const jwtService = new JwtService();
  ******************************************************************************/
 
 router.post('/login', async (req: Request, res: Response) => {
-  // Check email and password present
-  const { email, password } = req.body;
+  // Check account and password present
+  const { account: userId, password } = req.body;
 
-  if (!(email && password)) {
-    return res.status(BAD_REQUEST).json({
-      error: paramMissingError
+  if (!(userId && password)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError
     });
   }
   // Fetch user
-  const user = await userRepository.findOne({ email });
+  const user = await userRepository.findOne({ userId, relations: ['role'] });
   if (!user) {
-    return res.status(UNAUTHORIZED).json({
-      error: loginFailedErr
+    return res.json({
+      success: false,
+      message: '账号不存在！'
     });
   }
   // Check password
   const pwdPassed = await bcrypt.compare(password, user.pwdHash);
   if (!pwdPassed) {
-    return res.status(UNAUTHORIZED).json({
-      error: loginFailedErr
+    return res.status(OK).json({
+      success: false,
+      message: '密码错误！'
     });
   }
   // Setup Admin Cookie
-  //   const jwt = await jwtService.getJwt({
-  //     id: user.id,
-  //     role: user.role
-  //   });
-  //   const { key, options } = cookieProps;
-  //   res.cookie(key, jwt, options);
+  const jwt = await jwtService.getJwt({
+    id: user.id,
+    role: user.role.roleId
+  });
+  const { key, options } = cookieProps;
+  res.cookie(key, jwt, options);
+
   // Return
   return res.status(OK).json({
-    text: '登录成功！'
+    success: true,
+    data: {
+      userInfo: user
+    },
+    message: '登录成功!'
   });
 });
 
