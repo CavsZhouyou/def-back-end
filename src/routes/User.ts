@@ -5,6 +5,7 @@ import { ParamsDictionary } from 'express-serve-static-core';
 import { paramMissingError } from '@shared/constants';
 import { adminMW } from './middleware';
 import { userRepository } from '@shared/repositories';
+import { User } from '@entity/User';
 
 // Init shared
 const router = Router().use(adminMW);
@@ -23,17 +24,53 @@ router.post('/getUserList', async (req: Request, res: Response) => {
     });
   }
 
-  const users = await userRepository.find({
-    relations: ['department', 'post']
-  });
+  let users: User[] = [];
+  let hasMore = true;
+  let total = 0;
+  const dataStart = (page - 1) * pageSize;
+
+  // 用户列表查询
+  if (!userName) {
+    users = await userRepository.find({
+      relations: ['department', 'post']
+    });
+    total = users.length;
+
+    if (dataStart > total) {
+      return res.status(OK).json({
+        success: false,
+        message: '超出用户数据范围！'
+      });
+    } else {
+      users = users.slice(dataStart, pageSize);
+      hasMore = dataStart + pageSize < total;
+    }
+  } else {
+    // 单独用户查询
+    const user = await userRepository.findOne(
+      { userName },
+      {
+        relations: ['department', 'post']
+      }
+    );
+
+    if (user) {
+      users = [user];
+      total = 1;
+    } else {
+      users = [];
+    }
+
+    hasMore = false;
+  }
 
   return res.status(OK).json({
     success: true,
     data: {
       page,
       pageSize,
-      hasMore: false,
-      total: users.length,
+      hasMore,
+      total,
       list: users
     }
   });
