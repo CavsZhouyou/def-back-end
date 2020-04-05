@@ -10,10 +10,6 @@ import { User } from '@entity/User';
 // Init shared
 const router = Router().use(adminMW);
 
-/******************************************************************************
- *                      Get All Users - "POST /api/users/getUserList"
- ******************************************************************************/
-
 router.post('/getUserList', async (req: Request, res: Response) => {
   const { userName, page, pageSize } = req.body;
 
@@ -76,4 +72,28 @@ router.post('/getUserList', async (req: Request, res: Response) => {
   });
 });
 
+router.post('/addUser', async (req: Request, res: Response) => {
+  const { userName, userId, departmentId, postId } = req.body;
+
+  if (!(userName && userId && departmentId && postId)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError
+    });
+  }
+
+  const user = userRepository.findOne({ userName, userId });
+
+  if (user) {
+    return res.status(OK).json({
+      success: false,
+      message: '用户已存在！'
+    });
+  }
+
+  return res.status(OK).json({
+    success: true,
+    data: {}
+  });
+});
 export default router;
