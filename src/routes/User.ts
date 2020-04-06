@@ -24,11 +24,12 @@ router.post('/getUserList', async (req: Request, res: Response) => {
   let hasMore = true;
   let total = 0;
   const dataStart = (page - 1) * pageSize;
+  const relations = ['department', 'post', 'role'];
 
   // 用户列表查询
   if (!userName) {
     users = await userRepository.find({
-      relations: ['department', 'post']
+      relations
     });
     total = users.length;
 
@@ -46,7 +47,7 @@ router.post('/getUserList', async (req: Request, res: Response) => {
     const user = await userRepository.findOne(
       { userName },
       {
-        relations: ['department', 'post']
+        relations
       }
     );
 
