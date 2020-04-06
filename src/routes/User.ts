@@ -46,8 +46,13 @@ router.post('/getUserList', async (req: Request, res: Response) => {
         message: '超出用户数据范围！',
       });
     } else {
-      users = users.slice(dataStart, pageSize);
       hasMore = dataStart + pageSize < total;
+
+      if (hasMore) {
+        users = users.slice(dataStart, pageSize);
+      } else {
+        users = users.slice(dataStart);
+      }
     }
   } else {
     // 单独用户查询
