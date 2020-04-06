@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Publish } from './Publish';
 
 @Entity()
 export class PublishEnvironment {
@@ -10,4 +11,10 @@ export class PublishEnvironment {
 
   @Column()
   name: string;
+
+  @OneToMany(
+    type => Publish,
+    publish => publish.publishEnvironment
+  )
+  publishes: Publish[];
 }

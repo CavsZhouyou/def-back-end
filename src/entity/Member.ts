@@ -21,8 +21,10 @@ export class Member {
   @Column()
   expiredTime: string;
 
-  @OneToOne(type => MemberRole)
-  @JoinColumn()
+  @ManyToOne(
+    type => MemberRole,
+    memberRole => memberRole.members
+  )
   role: MemberRole;
 
   @ManyToOne(

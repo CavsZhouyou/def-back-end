@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Iteration } from './Iteration';
 
 @Entity()
 export class IterationStatus {
@@ -10,4 +11,10 @@ export class IterationStatus {
 
   @Column()
   name: string;
+
+  @OneToMany(
+    type => Iteration,
+    iteration => iteration.iterationStatus
+  )
+  iterations: Iteration[];
 }

@@ -1,11 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  OneToOne,
-  JoinColumn,
-  Column
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
 import { App } from './App';
 import { User } from './User';
 
@@ -20,8 +13,10 @@ export class Dynamic {
   @Column()
   operateTime: string;
 
-  @OneToOne(type => User)
-  @JoinColumn()
+  @ManyToOne(
+    type => User,
+    user => user.createdDynamics
+  )
   creator: User;
 
   @ManyToOne(

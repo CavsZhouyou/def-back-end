@@ -1,10 +1,17 @@
 import { Request, Response, Router } from 'express';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
 import { ParamsDictionary } from 'express-serve-static-core';
+import bcrypt from 'bcrypt';
+import md5 from 'md5';
 
-import { paramMissingError } from '@shared/constants';
+import { paramMissingError, pwdSaltRounds } from '@shared/constants';
 import { adminMW } from './middleware';
-import { userRepository } from '@shared/repositories';
+import {
+  userRepository,
+  userRoleRepository,
+  postRepository,
+  departmentRepository
+} from '@shared/repositories';
 import { User } from '@entity/User';
 
 // Init shared
@@ -74,16 +81,16 @@ router.post('/getUserList', async (req: Request, res: Response) => {
 });
 
 router.post('/addUser', async (req: Request, res: Response) => {
-  const { userName, userId, departmentId, postId } = req.body;
+  const { userName, userId, departmentId, postId, userRoleId } = req.body;
 
-  if (!(userName && userId && departmentId && postId)) {
+  if (!(userName && userId && departmentId && postId && userRoleId)) {
     return res.status(OK).json({
       success: false,
       message: paramMissingError
     });
   }
 
-  const user = userRepository.findOne({ userName, userId });
+  const user = await userRepository.findOne({ userName, userId });
 
   if (user) {
     return res.status(OK).json({
@@ -92,9 +99,32 @@ router.post('/addUser', async (req: Request, res: Response) => {
     });
   }
 
+  const post = await postRepository.findOne({ postId });
+  const department = await departmentRepository.findOne({ departmentId });
+  const role = await userRoleRepository.findOne({ departmentId });
+  // let newUser = new User();
+
+  // newUser.userId = userId;
+  // newUser.userName = userName;
+  // newUser.userAvatar = `http://hd215.api.yesapi.cn/?s=Ext.Avatar.Show&nickname=${userName}&size=500&app_key=4C389AC422864EB57101E24648435351&sign=BCF78D4C895E4054AC0B231BD1DD0524`;
+  // newUser.pwdHash = bcrypt.hashSync(md5(userId), pwdSaltRounds);
+  // newUser.post = post;
+  // newUser.department = department;
+  // newUser.role = role;
+  const newUser = userRepository.create({
+    userId,
+    userName,
+    userAvatar: `http://hd215.api.yesapi.cn/?s=Ext.Avatar.Show&nickname=${userName}&size=500&app_key=4C389AC422864EB57101E24648435351&sign=BCF78D4C895E4054AC0B231BD1DD0524`,
+    pwdHash: bcrypt.hashSync(md5(userId), pwdSaltRounds),
+    post,
+    department,
+    role
+  });
+
+  await userRepository.insert(newUser);
+
   return res.status(OK).json({
-    success: true,
-    data: {}
+    success: true
   });
 });
 export default router;

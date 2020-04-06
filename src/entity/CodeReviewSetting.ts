@@ -1,10 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToOne,
-  JoinColumn
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { ReviewerScopeType } from './ReviewerScopeType';
 
 @Entity()
@@ -15,7 +9,9 @@ export class CodeReviewSetting {
   @Column()
   isOpen: boolean;
 
-  @OneToOne(type => ReviewerScopeType)
-  @JoinColumn()
+  @ManyToOne(
+    type => ReviewerScopeType,
+    reviewerScopeType => reviewerScopeType.settings
+  )
   reviewerScope: ReviewerScopeType;
 }

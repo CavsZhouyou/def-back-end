@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { App } from './App';
 
 @Entity()
 export class ProductType {
@@ -10,4 +11,10 @@ export class ProductType {
 
   @Column()
   name: string;
+
+  @OneToMany(
+    type => App,
+    app => app.productType
+  )
+  apps: App[];
 }

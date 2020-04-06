@@ -32,30 +32,30 @@ export class Publish {
   @JoinColumn()
   log: Log;
 
-  @OneToOne(type => PublishEnvironment)
-  @JoinColumn()
-  publishEnvironment: PublishEnvironment;
-
-  @OneToOne(type => PublishStatus)
-  @JoinColumn()
-  publishStatus: PublishStatus;
-
-  @OneToOne(type => PublishType)
-  @JoinColumn()
-  publishType: PublishType;
-
-  @ManyToOne(
-    type => User,
-    user => user.createdPublishes
-  )
-  publisher: User;
-
   @OneToOne(
     type => Review,
     review => review.publish
   )
   @JoinColumn()
   review: Review;
+
+  @ManyToOne(
+    type => PublishEnvironment,
+    publishEnvironment => publishEnvironment.publishes
+  )
+  publishEnvironment: PublishEnvironment;
+
+  @ManyToOne(
+    type => PublishStatus,
+    publishStatus => publishStatus.publishes
+  )
+  publishStatus: PublishStatus;
+
+  @ManyToOne(
+    type => User,
+    user => user.createdPublishes
+  )
+  publisher: User;
 
   @ManyToOne(
     type => Iteration,

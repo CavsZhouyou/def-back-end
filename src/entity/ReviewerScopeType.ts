@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { CodeReviewSetting } from './CodeReviewSetting';
 
 @Entity()
 export class ReviewerScopeType {
@@ -10,4 +11,10 @@ export class ReviewerScopeType {
 
   @Column()
   name: string;
+
+  @OneToMany(
+    type => CodeReviewSetting,
+    codeReviewSetting => codeReviewSetting.reviewerScope
+  )
+  settings: CodeReviewSetting[];
 }

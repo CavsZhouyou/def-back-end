@@ -38,8 +38,10 @@ export class Iteration {
   @Column()
   master: string;
 
-  @OneToOne(type => IterationStatus)
-  @JoinColumn()
+  @ManyToOne(
+    type => IterationStatus,
+    iterationStatus => iterationStatus.iterations
+  )
   iterationStatus: IterationStatus;
 
   @ManyToOne(
@@ -48,15 +50,15 @@ export class Iteration {
   )
   creator: User;
 
-  @OneToMany(
-    type => Publish,
-    publish => publish.iteration
-  )
-  publishes: Publish[];
-
   @ManyToOne(
     type => App,
     app => app.iterations
   )
   app: App;
+
+  @OneToMany(
+    type => Publish,
+    publish => publish.iteration
+  )
+  publishes: Publish[];
 }

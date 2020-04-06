@@ -38,14 +38,6 @@ export class App {
   @Column()
   pagePrefix: string;
 
-  @OneToOne(type => PublishType)
-  @JoinColumn()
-  publishType: PublishType;
-
-  @OneToOne(type => ProductType)
-  @JoinColumn()
-  productType: ProductType;
-
   @OneToOne(type => CodeReviewSetting)
   @JoinColumn()
   codeReviewSetting: CodeReviewSetting;
@@ -73,4 +65,16 @@ export class App {
     user => user.createdApps
   )
   creator: User;
+
+  @ManyToOne(
+    type => PublishType,
+    publishType => publishType.apps
+  )
+  publishType: PublishType;
+
+  @ManyToOne(
+    type => ProductType,
+    productType => productType.apps
+  )
+  productType: ProductType;
 }

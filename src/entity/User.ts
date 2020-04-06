@@ -4,7 +4,8 @@ import {
   OneToOne,
   OneToMany,
   JoinColumn,
-  Column
+  Column,
+  ManyToOne
 } from 'typeorm';
 import { UserRole } from './UserRole';
 import { Department } from './Department';
@@ -13,6 +14,8 @@ import { App } from './App';
 import { Member } from './Member';
 import { Publish } from './Publish';
 import { Iteration } from './Iteration';
+import { Dynamic } from './Dynamic';
+import { Review } from './Review';
 
 @Entity()
 export class User {
@@ -31,16 +34,22 @@ export class User {
   @Column()
   pwdHash: string;
 
-  @OneToOne(type => UserRole)
-  @JoinColumn()
+  @ManyToOne(
+    type => UserRole,
+    userRole => userRole.users
+  )
   role: UserRole;
 
-  @OneToOne(type => Post)
-  @JoinColumn()
+  @ManyToOne(
+    type => Post,
+    post => post.users
+  )
   post: Post;
 
-  @OneToOne(type => Department)
-  @JoinColumn()
+  @OneToMany(
+    type => Department,
+    department => department.users
+  )
   department: Department;
 
   @OneToMany(
@@ -48,6 +57,12 @@ export class User {
     app => app.creator
   )
   createdApps: App[];
+
+  @OneToMany(
+    type => Dynamic,
+    dynamic => dynamic.creator
+  )
+  createdDynamics: Dynamic[];
 
   @OneToMany(
     type => Member,
@@ -66,4 +81,16 @@ export class User {
     iteration => iteration.creator
   )
   createdIterations: Iteration[];
+
+  @OneToMany(
+    type => Review,
+    review => review.creator
+  )
+  createdReviews: Review[];
+
+  @OneToMany(
+    type => Review,
+    review => review.reviewer
+  )
+  reviews: Review[];
 }
