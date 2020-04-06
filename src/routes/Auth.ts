@@ -6,7 +6,7 @@ import { JwtService } from '@shared/JwtService';
 import {
   paramMissingError,
   loginFailedErr,
-  cookieProps
+  cookieProps,
 } from '@shared/constants';
 import { userRepository } from '@shared/repositories';
 
@@ -24,15 +24,18 @@ router.post('/login', async (req: Request, res: Response) => {
   if (!(userId && password)) {
     return res.status(OK).json({
       success: false,
-      message: paramMissingError
+      message: paramMissingError,
     });
   }
   // Fetch user
-  const user = await userRepository.findOne({ userId, relations: ['role'] });
+  const user = await userRepository.findOne(
+    { userId },
+    { relations: ['role'] }
+  );
   if (!user) {
     return res.json({
       success: false,
-      message: '账号不存在！'
+      message: '账号不存在！',
     });
   }
   // Check password
@@ -40,13 +43,13 @@ router.post('/login', async (req: Request, res: Response) => {
   if (!pwdPassed) {
     return res.status(OK).json({
       success: false,
-      message: '密码错误！'
+      message: '密码错误！',
     });
   }
   // Setup Admin Cookie
   const jwt = await jwtService.getJwt({
     id: user.id,
-    role: user.role.roleId
+    role: user.role.roleId,
   });
   const { key, options } = cookieProps;
   res.cookie(key, jwt, options);
@@ -55,9 +58,9 @@ router.post('/login', async (req: Request, res: Response) => {
   return res.status(OK).json({
     success: true,
     data: {
-      userInfo: user
+      userInfo: user,
     },
-    message: '登录成功!'
+    message: '登录成功!',
   });
 });
 

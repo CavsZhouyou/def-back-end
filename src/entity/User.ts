@@ -46,7 +46,7 @@ export class User {
   )
   post: Post;
 
-  @OneToMany(
+  @ManyToOne(
     type => Department,
     department => department.users
   )

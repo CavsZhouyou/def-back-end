@@ -10,7 +10,7 @@ import {
   userRepository,
   userRoleRepository,
   postRepository,
-  departmentRepository
+  departmentRepository,
 } from '@shared/repositories';
 import { User } from '@entity/User';
 
@@ -23,7 +23,7 @@ router.post('/getUserList', async (req: Request, res: Response) => {
   if (!(page && pageSize)) {
     return res.status(OK).json({
       success: false,
-      message: paramMissingError
+      message: paramMissingError,
     });
   }
 
@@ -36,14 +36,14 @@ router.post('/getUserList', async (req: Request, res: Response) => {
   // 用户列表查询
   if (!userName) {
     users = await userRepository.find({
-      relations
+      relations,
     });
     total = users.length;
 
     if (dataStart > total) {
       return res.status(OK).json({
         success: false,
-        message: '超出用户数据范围！'
+        message: '超出用户数据范围！',
       });
     } else {
       users = users.slice(dataStart, pageSize);
@@ -54,7 +54,7 @@ router.post('/getUserList', async (req: Request, res: Response) => {
     const user = await userRepository.findOne(
       { userName },
       {
-        relations
+        relations,
       }
     );
 
@@ -75,8 +75,8 @@ router.post('/getUserList', async (req: Request, res: Response) => {
       pageSize,
       hasMore,
       total,
-      list: users
-    }
+      list: users,
+    },
   });
 });
 
@@ -86,45 +86,39 @@ router.post('/addUser', async (req: Request, res: Response) => {
   if (!(userName && userId && departmentId && postId && userRoleId)) {
     return res.status(OK).json({
       success: false,
-      message: paramMissingError
+      message: paramMissingError,
     });
   }
 
-  const user = await userRepository.findOne({ userName, userId });
+  const user = await userRepository.findOne({ userId });
 
   if (user) {
     return res.status(OK).json({
       success: false,
-      message: '用户已存在！'
+      message: '用户已存在！',
     });
   }
 
   const post = await postRepository.findOne({ postId });
   const department = await departmentRepository.findOne({ departmentId });
-  const role = await userRoleRepository.findOne({ departmentId });
-  // let newUser = new User();
+  const role = await userRoleRepository.findOne({ roleId: userRoleId });
+  const userAvatar = `http://hd215.api.yesapi.cn/?s=Ext.Avatar.Show&nickname=${userName}&size=500&app_key=4C389AC422864EB57101E24648435351&sign=BCF78D4C895E4054AC0B231BD1DD0524`;
+  const pwdHash = bcrypt.hashSync(md5(userId), pwdSaltRounds);
 
-  // newUser.userId = userId;
-  // newUser.userName = userName;
-  // newUser.userAvatar = `http://hd215.api.yesapi.cn/?s=Ext.Avatar.Show&nickname=${userName}&size=500&app_key=4C389AC422864EB57101E24648435351&sign=BCF78D4C895E4054AC0B231BD1DD0524`;
-  // newUser.pwdHash = bcrypt.hashSync(md5(userId), pwdSaltRounds);
-  // newUser.post = post;
-  // newUser.department = department;
-  // newUser.role = role;
   const newUser = userRepository.create({
     userId,
     userName,
-    userAvatar: `http://hd215.api.yesapi.cn/?s=Ext.Avatar.Show&nickname=${userName}&size=500&app_key=4C389AC422864EB57101E24648435351&sign=BCF78D4C895E4054AC0B231BD1DD0524`,
-    pwdHash: bcrypt.hashSync(md5(userId), pwdSaltRounds),
+    userAvatar,
+    pwdHash,
     post,
     department,
-    role
+    role,
   });
 
   await userRepository.insert(newUser);
 
   return res.status(OK).json({
-    success: true
+    success: true,
   });
 });
 export default router;
