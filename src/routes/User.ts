@@ -180,4 +180,40 @@ router.post('/resetPassword', async (req: Request, res: Response) => {
     success: true,
   });
 });
+
+router.post('/changePassword', async (req: Request, res: Response) => {
+  const { userId, newPassword, oldPassword } = req.body;
+
+  if (!(userId && newPassword && oldPassword)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const user = await userRepository.findOne({ userId });
+
+  if (!user) {
+    return res.status(OK).json({
+      success: false,
+      message: '用户不存在！',
+    });
+  }
+
+  const pwdPassed = await bcrypt.compare(oldPassword, user.pwdHash);
+  if (!pwdPassed) {
+    return res.status(OK).json({
+      success: false,
+      message: '原密码错误！',
+    });
+  }
+
+  user.pwdHash = bcrypt.hashSync(newPassword, pwdSaltRounds);
+
+  await userRepository.save(user);
+
+  return res.status(OK).json({
+    success: true,
+  });
+});
 export default router;
