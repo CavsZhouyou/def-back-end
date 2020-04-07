@@ -28,7 +28,25 @@ export const adminMW = async (
     }
   } catch (err) {
     return res.status(UNAUTHORIZED).json({
-      code: 401,
+      error: err.message,
+    });
+  }
+};
+
+// Middleware to verify if user is login
+export const loginMW = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Get json-web-token
+    const jwt = req.signedCookies[cookieProps.key];
+    if (!jwt) {
+      throw Error('JWT not present in signed cookie.');
+    }
+  } catch (err) {
+    return res.status(UNAUTHORIZED).json({
       error: err.message,
     });
   }
