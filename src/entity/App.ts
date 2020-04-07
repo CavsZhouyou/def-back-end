@@ -5,7 +5,7 @@ import {
   OneToOne,
   ManyToOne,
   JoinColumn,
-  Column
+  Column,
 } from 'typeorm';
 import { User } from './User';
 import { Member } from './Member';
@@ -38,43 +38,27 @@ export class App {
   @Column()
   pagePrefix: string;
 
-  @OneToOne(type => CodeReviewSetting)
+  @OneToOne((type) => CodeReviewSetting, {
+    cascade: true,
+  })
   @JoinColumn()
   codeReviewSetting: CodeReviewSetting;
 
-  @OneToMany(
-    type => Dynamic,
-    dynamic => dynamic.app
-  )
+  @OneToMany((type) => Dynamic, (dynamic) => dynamic.app)
   dynamics: Dynamic[];
 
-  @OneToMany(
-    type => Member,
-    member => member.app
-  )
+  @OneToMany((type) => Member, (member) => member.app)
   members: Member[];
 
-  @OneToMany(
-    type => Iteration,
-    iteration => iteration.app
-  )
+  @OneToMany((type) => Iteration, (iteration) => iteration.app)
   iterations: Iteration[];
 
-  @ManyToOne(
-    type => User,
-    user => user.createdApps
-  )
+  @ManyToOne((type) => User, (user) => user.createdApps)
   creator: User;
 
-  @ManyToOne(
-    type => PublishType,
-    publishType => publishType.apps
-  )
+  @ManyToOne((type) => PublishType, (publishType) => publishType.apps)
   publishType: PublishType;
 
-  @ManyToOne(
-    type => ProductType,
-    productType => productType.apps
-  )
+  @ManyToOne((type) => ProductType, (productType) => productType.apps)
   productType: ProductType;
 }

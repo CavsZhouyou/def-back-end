@@ -2,14 +2,21 @@ import { Request, Response, Router } from 'express';
 import { OK } from 'http-status-codes';
 import { paramMissingError } from '@shared/constants';
 import { loginMW } from './middleware';
-import { userRepository } from '@shared/repositories';
+import {
+  userRepository,
+  appRepository,
+  codeReviewSettingRepository,
+  reviewerScopeTypeRepository,
+  publishTypeRepository,
+  productTypeRepository,
+} from '@shared/repositories';
 import { User } from '@entity/User';
 
 // Init shared
 const router = Router().use(loginMW);
 
 /******************************************************************************
- *                      获取应用列表 - "POST/api/user/getAppList"
+ *                      获取应用列表 - "POST/def/user/getAppList"
  ******************************************************************************/
 
 router.post('/getAppList', async (req: Request, res: Response) => {
@@ -77,6 +84,76 @@ router.post('/getAppList', async (req: Request, res: Response) => {
       // hasMore,
       // total,
       // list: users,
+    },
+  });
+});
+
+/******************************************************************************
+ *                      新建应用 - "POST/def/app/createApp"
+ ******************************************************************************/
+
+router.post('/createApp', async (req: Request, res: Response) => {
+  const {
+    userId,
+    appName,
+    repository,
+    description,
+    productTypeId,
+    publishTypeId,
+  } = req.body;
+
+  if (
+    !(
+      userId &&
+      appName &&
+      repository &&
+      description &&
+      productTypeId &&
+      publishTypeId
+    )
+  ) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const appLogo =
+    'https://cavszhouyou-1254093697.cos.ap-chongqing.myqcloud.com/html_logo.png';
+  const onlineAddress = '暂无发布';
+  const pagePrefix = '/webapp/publish';
+  const codeReviewSetting = codeReviewSettingRepository.create({
+    isOpen: true,
+    reviewerScope: await reviewerScopeTypeRepository.findOne(),
+  });
+  const creator = await userRepository.findOne({ userId });
+  const publishType = await publishTypeRepository.findOne({
+    code: publishTypeId,
+  });
+  const productType = await productTypeRepository.findOne({
+    code: productTypeId,
+  });
+
+  const app = appRepository.create({
+    appName,
+    description,
+    appLogo,
+    repository,
+    onlineAddress,
+    pagePrefix,
+    codeReviewSetting,
+    creator,
+    publishType,
+    productType,
+  });
+
+  const savedApp = await appRepository.save(app);
+
+  return res.status(OK).json({
+    success: true,
+    data: {
+      appId: savedApp.appId,
+      appName: savedApp.appName,
     },
   });
 });
