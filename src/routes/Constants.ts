@@ -1,14 +1,17 @@
-import bcrypt from 'bcrypt';
 import { Request, Response, Router } from 'express';
 import { OK } from 'http-status-codes';
 
 import {
   departmentRepository,
   postRepository,
-  userRoleRepository
+  userRoleRepository,
+  publishTypeRepository,
+  productTypeRepository,
 } from '@shared/repositories';
+import { loginMW } from './middleware';
 
-const router = Router();
+// Init shared
+const router = Router().use(loginMW);
 
 router.get('/getDepartmentList', async (req: Request, res: Response) => {
   const departmentList = await departmentRepository.find();
@@ -16,8 +19,8 @@ router.get('/getDepartmentList', async (req: Request, res: Response) => {
   return res.status(OK).json({
     success: true,
     data: {
-      list: departmentList
-    }
+      list: departmentList,
+    },
   });
 });
 
@@ -27,8 +30,8 @@ router.get('/getPostList', async (req: Request, res: Response) => {
   return res.status(OK).json({
     success: true,
     data: {
-      list: postList
-    }
+      list: postList,
+    },
   });
 });
 
@@ -38,8 +41,30 @@ router.get('/getUserRoleList', async (req: Request, res: Response) => {
   return res.status(OK).json({
     success: true,
     data: {
-      list: userRoleList
-    }
+      list: userRoleList,
+    },
+  });
+});
+
+router.get('/getProductTypeList', async (req: Request, res: Response) => {
+  const productTypes = await productTypeRepository.find();
+
+  return res.status(OK).json({
+    success: true,
+    data: {
+      list: productTypes,
+    },
+  });
+});
+
+router.get('/getPublishTypeList', async (req: Request, res: Response) => {
+  const publishTypes = await publishTypeRepository.find();
+
+  return res.status(OK).json({
+    success: true,
+    data: {
+      list: publishTypes,
+    },
   });
 });
 export default router;

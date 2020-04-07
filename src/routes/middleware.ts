@@ -45,6 +45,8 @@ export const loginMW = async (
     if (!jwt) {
       throw Error('JWT not present in signed cookie.');
     }
+
+    next();
   } catch (err) {
     return res.status(UNAUTHORIZED).json({
       error: err.message,

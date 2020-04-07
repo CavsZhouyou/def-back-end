@@ -1,6 +1,5 @@
 import { Request, Response, Router } from 'express';
-import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
-import { ParamsDictionary } from 'express-serve-static-core';
+import { OK } from 'http-status-codes';
 import bcrypt from 'bcrypt';
 import md5 from 'md5';
 
@@ -236,4 +235,9 @@ router.post('/changePassword', async (req: Request, res: Response) => {
     success: true,
   });
 });
+
+/******************************************************************************
+ *                                 Export Router
+ ******************************************************************************/
+
 export default router;
