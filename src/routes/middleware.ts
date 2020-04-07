@@ -28,7 +28,8 @@ export const adminMW = async (
     }
   } catch (err) {
     return res.status(UNAUTHORIZED).json({
-      error: err.message
+      code: 401,
+      error: err.message,
     });
   }
 };
