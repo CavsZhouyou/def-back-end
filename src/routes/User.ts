@@ -31,49 +31,35 @@ router.post('/getUserList', async (req: Request, res: Response) => {
   }
 
   let users: User[] = [];
+  let queryOptions: any = {};
   let hasMore = true;
   let total = 0;
   const dataStart = (page - 1) * pageSize;
   const relations = ['department', 'post', 'role'];
 
-  // 用户列表查询
-  if (!userName) {
-    users = await userRepository.find({
-      relations,
+  if (userName) queryOptions.userName = userName;
+
+  users = await userRepository.find({
+    where: {
+      ...queryOptions,
+    },
+    relations,
+  });
+  total = users.length;
+
+  if (dataStart > total) {
+    return res.status(OK).json({
+      success: false,
+      message: '超出用户数据范围！',
     });
-    total = users.length;
-
-    if (dataStart > total) {
-      return res.status(OK).json({
-        success: false,
-        message: '超出用户数据范围！',
-      });
-    } else {
-      hasMore = dataStart + pageSize < total;
-
-      if (hasMore) {
-        users = users.slice(dataStart, pageSize);
-      } else {
-        users = users.slice(dataStart);
-      }
-    }
   } else {
-    // 单独用户查询
-    const user = await userRepository.findOne(
-      { userName },
-      {
-        relations,
-      }
-    );
+    hasMore = dataStart + pageSize < total;
 
-    if (user) {
-      users = [user];
-      total = 1;
+    if (hasMore) {
+      users = users.slice(dataStart, pageSize);
     } else {
-      users = [];
+      users = users.slice(dataStart);
     }
-
-    hasMore = false;
   }
 
   return res.status(OK).json({
