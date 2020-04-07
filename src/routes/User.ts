@@ -126,4 +126,30 @@ router.post('/addUser', async (req: Request, res: Response) => {
     success: true,
   });
 });
+
+router.post('/deleteUser', async (req: Request, res: Response) => {
+  const { userId } = req.body;
+
+  if (!userId) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const user = await userRepository.findOne({ userId });
+
+  if (!user) {
+    return res.status(OK).json({
+      success: false,
+      message: '用户不存在！',
+    });
+  }
+
+  await userRepository.remove(user);
+
+  return res.status(OK).json({
+    success: true,
+  });
+});
 export default router;
