@@ -18,7 +18,6 @@ const jwtService = new JwtService();
  ******************************************************************************/
 
 router.post('/login', async (req: Request, res: Response) => {
-  // Check account and password present
   const { account: userId, password } = req.body;
 
   if (!(userId && password)) {
@@ -27,7 +26,7 @@ router.post('/login', async (req: Request, res: Response) => {
       message: paramMissingError,
     });
   }
-  // Fetch user
+
   const user = await userRepository.findOne(
     { userId },
     { relations: ['role'] }
@@ -38,7 +37,7 @@ router.post('/login', async (req: Request, res: Response) => {
       message: '账号不存在！',
     });
   }
-  // Check password
+
   const pwdPassed = await bcrypt.compare(password, user.pwdHash);
   if (!pwdPassed) {
     return res.status(OK).json({
@@ -46,7 +45,7 @@ router.post('/login', async (req: Request, res: Response) => {
       message: '密码错误！',
     });
   }
-  // Setup Admin Cookie
+
   const jwt = await jwtService.getJwt({
     id: user.id,
     role: user.role.roleId,
@@ -54,7 +53,6 @@ router.post('/login', async (req: Request, res: Response) => {
   const { key, options } = cookieProps;
   res.cookie(key, jwt, options);
 
-  // Return
   return res.status(OK).json({
     success: true,
     data: {

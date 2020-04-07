@@ -17,6 +17,10 @@ import { User } from '@entity/User';
 // Init shared
 const router = Router().use(adminMW);
 
+/******************************************************************************
+ *                      获取用户列表 - "POST/api/user/getUserList"
+ ******************************************************************************/
+
 router.post('/getUserList', async (req: Request, res: Response) => {
   const { userName, page, pageSize } = req.body;
 
@@ -85,6 +89,10 @@ router.post('/getUserList', async (req: Request, res: Response) => {
   });
 });
 
+/******************************************************************************
+ *                      新增用户 - "POST/api/user/addUser"
+ ******************************************************************************/
+
 router.post('/addUser', async (req: Request, res: Response) => {
   const { userName, userId, departmentId, postId, userRoleId } = req.body;
 
@@ -127,6 +135,10 @@ router.post('/addUser', async (req: Request, res: Response) => {
   });
 });
 
+/******************************************************************************
+ *                      删除用户 - "POST/api/user/deleteUser"
+ ******************************************************************************/
+
 router.post('/deleteUser', async (req: Request, res: Response) => {
   const { userId } = req.body;
 
@@ -152,6 +164,10 @@ router.post('/deleteUser', async (req: Request, res: Response) => {
     success: true,
   });
 });
+
+/******************************************************************************
+ *                      重置用户密码 - "POST/api/user/resetPassword"
+ ******************************************************************************/
 
 router.post('/resetPassword', async (req: Request, res: Response) => {
   const { userId } = req.body;
@@ -180,6 +196,10 @@ router.post('/resetPassword', async (req: Request, res: Response) => {
     success: true,
   });
 });
+
+/******************************************************************************
+ *                      修改用户密码 - "POST/api/user/changePassword"
+ ******************************************************************************/
 
 router.post('/changePassword', async (req: Request, res: Response) => {
   const { userId, newPassword, oldPassword } = req.body;
