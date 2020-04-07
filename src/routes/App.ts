@@ -10,7 +10,7 @@ import {
   publishTypeRepository,
   productTypeRepository,
 } from '@shared/repositories';
-import { User } from '@entity/User';
+import { App } from '@entity/App';
 
 // Init shared
 const router = Router().use(loginMW);
@@ -20,70 +20,64 @@ const router = Router().use(loginMW);
  ******************************************************************************/
 
 router.post('/getAppList', async (req: Request, res: Response) => {
-  const { userName, page, pageSize } = req.body;
+  const { userId, appName, publishType, page, pageSize } = req.body;
 
-  if (!(page && pageSize)) {
+  if (!(page && pageSize && publishType)) {
     return res.status(OK).json({
       success: false,
       message: paramMissingError,
     });
   }
 
-  // let users: User[] = [];
-  // let hasMore = true;
-  // let total = 0;
-  // const dataStart = (page - 1) * pageSize;
-  // const relations = ['department', 'post', 'role'];
+  let apps: App[] = [];
+  let queryOptions: any = {};
+  let hasMore = true;
+  let total = 0;
+  const dataStart = (page - 1) * pageSize;
+  const relations = ['iterations', 'publishType'];
 
-  // // 用户列表查询
-  // if (!userName) {
-  //   users = await userRepository.find({
-  //     relations,
-  //   });
-  //   total = users.length;
+  if (appName) queryOptions.appName = appName;
+  if (publishType.length >= 1)
+    queryOptions.publishType = await publishTypeRepository.findOne({
+      code: publishType[0],
+    });
+  if (userId)
+    queryOptions.creator = await userRepository.findOne({
+      userId,
+    });
 
-  //   if (dataStart > total) {
-  //     return res.status(OK).json({
-  //       success: false,
-  //       message: '超出用户数据范围！',
-  //     });
-  //   } else {
-  //     hasMore = dataStart + pageSize < total;
+  // 用户列表查询
+  apps = await appRepository.find({
+    where: {
+      ...queryOptions,
+    },
+    relations,
+  });
+  total = apps.length;
 
-  //     if (hasMore) {
-  //       users = users.slice(dataStart, pageSize);
-  //     } else {
-  //       users = users.slice(dataStart);
-  //     }
-  //   }
-  // } else {
-  //   // 单独用户查询
-  //   const user = await userRepository.findOne(
-  //     { userName },
-  //     {
-  //       relations,
-  //     }
-  //   );
+  if (dataStart > total) {
+    return res.status(OK).json({
+      success: false,
+      message: '超出数据范围！',
+    });
+  } else {
+    hasMore = dataStart + pageSize < total;
 
-  //   if (user) {
-  //     users = [user];
-  //     total = 1;
-  //   } else {
-  //     users = [];
-  //   }
-
-  //   hasMore = false;
-  // }
+    if (hasMore) {
+      apps = apps.slice(dataStart, pageSize);
+    } else {
+      apps = apps.slice(dataStart);
+    }
+  }
 
   return res.status(OK).json({
     success: true,
     data: {
-      list: [],
-      // page,
-      // pageSize,
-      // hasMore,
-      // total,
-      // list: users,
+      page,
+      pageSize,
+      hasMore,
+      total,
+      list: apps,
     },
   });
 });
@@ -118,8 +112,6 @@ router.post('/createApp', async (req: Request, res: Response) => {
     });
   }
 
-  const appLogo =
-    'https://cavszhouyou-1254093697.cos.ap-chongqing.myqcloud.com/html_logo.png';
   const onlineAddress = '暂无发布';
   const pagePrefix = '/webapp/publish';
   const codeReviewSetting = codeReviewSettingRepository.create({
@@ -130,9 +122,12 @@ router.post('/createApp', async (req: Request, res: Response) => {
   const publishType = await publishTypeRepository.findOne({
     code: publishTypeId,
   });
+  const appLogo = publishType.logo;
   const productType = await productTypeRepository.findOne({
     code: productTypeId,
   });
+  const createTime = new Date().getTime();
+  const progressingIterationCount = 0;
 
   const app = appRepository.create({
     appName,
@@ -141,10 +136,12 @@ router.post('/createApp', async (req: Request, res: Response) => {
     repository,
     onlineAddress,
     pagePrefix,
+    createTime,
     codeReviewSetting,
     creator,
     publishType,
     productType,
+    progressingIterationCount,
   });
 
   const savedApp = await appRepository.save(app);

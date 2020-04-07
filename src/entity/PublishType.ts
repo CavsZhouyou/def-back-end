@@ -12,9 +12,9 @@ export class PublishType {
   @Column()
   name: string;
 
-  @OneToMany(
-    type => App,
-    app => app.publishType
-  )
+  @Column()
+  logo: string;
+
+  @OneToMany((type) => App, (app) => app.publishType)
   apps: App[];
 }

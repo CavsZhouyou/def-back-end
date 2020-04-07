@@ -38,6 +38,12 @@ export class App {
   @Column()
   pagePrefix: string;
 
+  @Column()
+  createTime: string;
+
+  @Column()
+  progressingIterationCount: number;
+
   @OneToOne((type) => CodeReviewSetting, {
     cascade: true,
   })
