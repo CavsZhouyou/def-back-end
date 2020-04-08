@@ -120,6 +120,51 @@ router.post('/getMyAppList', async (req: Request, res: Response) => {
 });
 
 /******************************************************************************
+ *            获取应用分支列表 - "POST/def/app/getAppBranchList"
+ ******************************************************************************/
+
+router.post('/getAppBranches', async (req: Request, res: Response) => {
+  const { appId } = req.body;
+
+  if (!appId) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const app = await appRepository.findOne({
+    appId,
+  });
+
+  const list = [
+    {
+      branchId: 1,
+      branchName: 'daily/1.0.1',
+    },
+    {
+      branchId: 2,
+      branchName: 'daily/1.0.2',
+    },
+    {
+      branchId: 3,
+      branchName: 'daily/1.0.3',
+    },
+    {
+      branchId: 4,
+      branchName: 'daily/1.0.4',
+    },
+  ];
+
+  return res.status(OK).json({
+    success: true,
+    data: {
+      list,
+    },
+  });
+});
+
+/******************************************************************************
  *                      新建应用 - "POST/def/app/createApp"
  ******************************************************************************/
 
