@@ -16,10 +16,10 @@ import { App } from '@entity/App';
 const router = Router().use(loginMW);
 
 /******************************************************************************
- *                      获取应用列表 - "POST/def/app/getAppList"
+ *                      获取迭代列表 - "POST/def/iteration/getIterationList"
  ******************************************************************************/
 
-router.post('/getAppList', async (req: Request, res: Response) => {
+router.post('/getIterationList', async (req: Request, res: Response) => {
   const { userId, appName, publishType, page, pageSize } = req.body;
 
   if (!(page && pageSize && publishType)) {
@@ -77,53 +77,17 @@ router.post('/getAppList', async (req: Request, res: Response) => {
       pageSize,
       hasMore,
       total,
-      list: apps,
+      //   list: apps
+      list: [],
     },
   });
 });
 
 /******************************************************************************
- *            获取我的应用列表(app option) - "POST/def/app/getMyAppList"
+ *                      新建迭代 - "POST/def/iteration/createIteration"
  ******************************************************************************/
 
-router.post('/getMyAppList', async (req: Request, res: Response) => {
-  const { userId } = req.body;
-
-  if (!userId) {
-    return res.status(OK).json({
-      success: false,
-      message: paramMissingError,
-    });
-  }
-
-  let apps: App[] = [];
-  let queryOptions: any = {};
-
-  queryOptions.creator = await userRepository.findOne({
-    userId,
-  });
-
-  // 用户列表查询
-  apps = await appRepository.find({
-    select: ['appId', 'appName'],
-    where: {
-      ...queryOptions,
-    },
-  });
-
-  return res.status(OK).json({
-    success: true,
-    data: {
-      list: apps,
-    },
-  });
-});
-
-/******************************************************************************
- *                      新建应用 - "POST/def/app/createApp"
- ******************************************************************************/
-
-router.post('/createApp', async (req: Request, res: Response) => {
+router.post('/createIteration', async (req: Request, res: Response) => {
   const {
     userId,
     appName,

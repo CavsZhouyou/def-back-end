@@ -5,7 +5,7 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
-  Column
+  Column,
 } from 'typeorm';
 import { IterationStatus } from './IterationStatus';
 import { User } from './User';
@@ -39,26 +39,17 @@ export class Iteration {
   master: string;
 
   @ManyToOne(
-    type => IterationStatus,
-    iterationStatus => iterationStatus.iterations
+    (type) => IterationStatus,
+    (iterationStatus) => iterationStatus.iterations
   )
   iterationStatus: IterationStatus;
 
-  @ManyToOne(
-    type => User,
-    user => user.createdIterations
-  )
+  @ManyToOne((type) => User, (user) => user.createdIterations)
   creator: User;
 
-  @ManyToOne(
-    type => App,
-    app => app.iterations
-  )
+  @ManyToOne((type) => App, (app) => app.iterations)
   app: App;
 
-  @OneToMany(
-    type => Publish,
-    publish => publish.iteration
-  )
+  @OneToMany((type) => Publish, (publish) => publish.iteration)
   publishes: Publish[];
 }
