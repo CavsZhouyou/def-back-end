@@ -103,12 +103,6 @@ router.post('/addAppMember', async (req: Request, res: Response) => {
     });
   }
 
-  const app = await appRepository.findOne({
-    appId,
-  });
-  const memberRole = await memberRoleRepository.findOne({
-    roleId: role,
-  });
   const user = await userRepository.findOne({
     userName,
   });
@@ -120,7 +114,14 @@ router.post('/addAppMember', async (req: Request, res: Response) => {
     });
   }
 
+  const app = await appRepository.findOne({
+    appId,
+  });
+  const memberRole = await memberRoleRepository.findOne({
+    roleId: role,
+  });
   const member = await memberRepository.findOne({
+    app,
     user,
   });
 
@@ -132,7 +133,7 @@ router.post('/addAppMember', async (req: Request, res: Response) => {
         message: '该用户已经加入应用！',
       });
     } else {
-      member.role = role;
+      member.role = memberRole;
       member.expiredTime = new Date().getTime() + parseInt(useTime || '');
       await memberRepository.save(member);
     }
@@ -148,6 +149,59 @@ router.post('/addAppMember', async (req: Request, res: Response) => {
 
     await memberRepository.save(savedMember);
   }
+
+  return res.status(OK).json({
+    success: true,
+  });
+});
+
+/******************************************************************************
+ *            修改应用成员权限 - "POST/def/member/changeMemberRights"
+ ******************************************************************************/
+
+router.post('/changeMemberRights', async (req: Request, res: Response) => {
+  const { appId, userId, useTime, role } = req.body;
+
+  if (!(appId && userId && useTime && role)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const user = await userRepository.findOne({
+    userId,
+  });
+
+  if (!user) {
+    return res.status(OK).json({
+      success: false,
+      message: '用户不存在！',
+    });
+  }
+
+  const app = await appRepository.findOne({
+    appId,
+  });
+  const member = await memberRepository.findOne({
+    app,
+    user,
+  });
+
+  if (!member) {
+    return res.status(OK).json({
+      success: false,
+      message: '成员不存在！',
+    });
+  }
+
+  const memberRole = await memberRoleRepository.findOne({
+    roleId: role,
+  });
+
+  member.role = memberRole;
+  member.expiredTime = new Date().getTime() + parseInt(useTime || '');
+  await memberRepository.save(member);
 
   return res.status(OK).json({
     success: true,
