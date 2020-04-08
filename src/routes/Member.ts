@@ -209,6 +209,54 @@ router.post('/changeMemberRights', async (req: Request, res: Response) => {
 });
 
 /******************************************************************************
+ *            删除应用成员 - "POST/def/member/deleteAppMember"
+ ******************************************************************************/
+
+router.post('/deleteAppMember', async (req: Request, res: Response) => {
+  const { appId, userId } = req.body;
+
+  if (!(appId && userId)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const user = await userRepository.findOne({
+    userId,
+  });
+
+  if (!user) {
+    return res.status(OK).json({
+      success: false,
+      message: '用户不存在！',
+    });
+  }
+
+  const app = await appRepository.findOne({
+    appId,
+  });
+  const member = await memberRepository.findOne({
+    app,
+    user,
+  });
+
+  if (!member) {
+    return res.status(OK).json({
+      success: false,
+      message: '成员不存在！',
+    });
+  }
+
+  member.expiredTime = new Date().getTime();
+  await memberRepository.save(member);
+
+  return res.status(OK).json({
+    success: true,
+  });
+});
+
+/******************************************************************************
  *                                 Export Router
  ******************************************************************************/
 
