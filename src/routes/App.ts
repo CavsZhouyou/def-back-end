@@ -238,6 +238,37 @@ router.post('/createApp', async (req: Request, res: Response) => {
 });
 
 /******************************************************************************
+ *            获取应用基本信息 - "POST/def/app/getAppBasicInfo"
+ ******************************************************************************/
+
+router.post('/getAppBasicInfo', async (req: Request, res: Response) => {
+  const { userId, appId } = req.body;
+
+  if (!(userId && appId)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const app = await appRepository.findOne(
+    {
+      appId,
+    },
+    {
+      relations: ['creator', 'members', 'publishType', 'productType'],
+    }
+  );
+
+  return res.status(OK).json({
+    success: true,
+    data: {
+      ...app,
+    },
+  });
+});
+
+/******************************************************************************
  *                                 Export Router
  ******************************************************************************/
 
