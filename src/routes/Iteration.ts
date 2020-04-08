@@ -5,14 +5,9 @@ import { loginMW } from './middleware';
 import {
   userRepository,
   appRepository,
-  codeReviewSettingRepository,
-  reviewerScopeTypeRepository,
-  publishTypeRepository,
-  productTypeRepository,
   iterationStatusRepository,
   iterationRepository,
 } from '@shared/repositories';
-import { App } from '@entity/App';
 import { Iteration } from '@entity/Iteration';
 
 // Init shared
@@ -23,7 +18,7 @@ const router = Router().use(loginMW);
  ******************************************************************************/
 
 router.post('/getIterationList', async (req: Request, res: Response) => {
-  const { userId, appId, creator, iterationStatus, page, pageSize } = req.body;
+  const { userId, appId, iterationStatus, page, pageSize } = req.body;
 
   if (!(page && pageSize && userId && iterationStatus)) {
     return res.status(OK).json({
@@ -37,41 +32,81 @@ router.post('/getIterationList', async (req: Request, res: Response) => {
   let hasMore = true;
   let total = 0;
   const dataStart = (page - 1) * pageSize;
-  const relations = ['iterations', 'publishType'];
+  const relations = ['app', 'creator', 'iterationStatus', 'publishes'];
 
-  // if (appName) queryOptions.appName = appName;
-  // if (publishType.length >= 1)
-  //   queryOptions.publishType = await publishTypeRepository.findOne({
-  //     code: publishType[0],
-  //   });
-  // if (userId)
-  //   queryOptions.creator = await userRepository.findOne({
-  //     userId,
-  //   });
+  if (userId)
+    queryOptions.creator = await userRepository.findOne({
+      userId,
+    });
+  if (appId)
+    queryOptions.app = await appRepository.findOne({
+      appId,
+    });
+  if (iterationStatus.length >= 1)
+    queryOptions.iterationStatus = await iterationStatusRepository.findOne({
+      code: iterationStatus[0],
+    });
 
-  // // 用户列表查询
-  // apps = await appRepository.find({
-  //   where: {
-  //     ...queryOptions,
-  //   },
-  //   relations,
-  // });
-  // total = apps.length;
+  // 用户列表查询
+  iterations = await iterationRepository.find({
+    where: {
+      ...queryOptions,
+    },
+    relations,
+  });
+  total = iterations.length;
 
-  // if (dataStart > total) {
-  //   return res.status(OK).json({
-  //     success: false,
-  //     message: '超出数据范围！',
-  //   });
-  // } else {
-  //   hasMore = dataStart + pageSize < total;
+  if (dataStart > total) {
+    return res.status(OK).json({
+      success: false,
+      message: '超出数据范围！',
+    });
+  } else {
+    hasMore = dataStart + pageSize < total;
 
-  //   if (hasMore) {
-  //     apps = apps.slice(dataStart, pageSize);
-  //   } else {
-  //     apps = apps.slice(dataStart);
-  //   }
-  // }
+    if (hasMore) {
+      iterations = iterations.slice(dataStart, pageSize);
+    } else {
+      iterations = iterations.slice(dataStart);
+    }
+  }
+
+  const formattedIterations: any[] = [];
+
+  iterations.forEach((item: Iteration) => {
+    const {
+      iterationId,
+      version,
+      iterationName,
+      createTime,
+      endTime,
+      branch,
+      app,
+      creator,
+      publishes,
+      iterationStatus,
+    } = item;
+
+    const { appId, appLogo, appName } = app;
+    const { userName: creatorName, userAvatar: creatorAvatar } = creator;
+
+    //TODO: publish 处理
+
+    formattedIterations.push({
+      appId,
+      appLogo,
+      appName,
+      creatorName,
+      creatorAvatar,
+      iterationId,
+      version,
+      iterationName,
+      createTime,
+      endTime,
+      branch,
+      iterationStatus: iterationStatus.code,
+    });
+  });
 
   return res.status(OK).json({
     success: true,
@@ -80,8 +115,7 @@ router.post('/getIterationList', async (req: Request, res: Response) => {
       pageSize,
       hasMore,
       total,
-      //   list: apps
-      list: [],
+      list: formattedIterations,
     },
   });
 });
