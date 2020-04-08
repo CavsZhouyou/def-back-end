@@ -9,6 +9,8 @@ import {
   reviewerScopeTypeRepository,
   publishTypeRepository,
   productTypeRepository,
+  memberRoleRepository,
+  memberRepository,
 } from '@shared/repositories';
 import { App } from '@entity/App';
 
@@ -268,6 +270,44 @@ router.post('/getAppBasicInfo', async (req: Request, res: Response) => {
   });
 });
 
+/******************************************************************************
+ *            添加应用成员 - "POST/def/app/addAppMember"
+ ******************************************************************************/
+
+router.post('/addAppMember', async (req: Request, res: Response) => {
+  const { appId, userName, useTime, role } = req.body;
+
+  if (!(appId && userName && useTime && role)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const app = await appRepository.findOne({
+    appId,
+  });
+  const memberRole = await memberRoleRepository.findOne({
+    code: role,
+  });
+  const user = await userRepository.findOne({
+    userName,
+  });
+
+  const member = memberRepository.create({
+    joinTime: new Date().getTime(),
+    endTime: new Date().getTime() + parseInt(useTime || ''),
+    role: memberRole,
+    app,
+    user,
+  });
+
+  await memberRepository.save(member);
+
+  return res.status(OK).json({
+    success: true,
+  });
+});
 /******************************************************************************
  *                                 Export Router
  ******************************************************************************/

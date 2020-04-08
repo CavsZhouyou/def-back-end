@@ -20,7 +20,7 @@ const router = Router().use(loginMW);
 router.post('/getIterationList', async (req: Request, res: Response) => {
   const { userId, appId, iterationStatus, page, pageSize } = req.body;
 
-  if (!(page && pageSize && userId && iterationStatus)) {
+  if (!(page && pageSize && iterationStatus)) {
     return res.status(OK).json({
       success: false,
       message: paramMissingError,

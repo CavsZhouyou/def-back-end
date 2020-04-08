@@ -10,6 +10,8 @@ import { CodeReviewSetting } from '@entity/CodeReviewSetting';
 import { ReviewerScopeType } from '@entity/ReviewerScopeType';
 import { IterationStatus } from '@entity/IterationStatus';
 import { Iteration } from '@entity/Iteration';
+import { Member } from '@entity/Member';
+import { MemberRole } from '@entity/MemberRole';
 
 export let userRepository: any;
 export let departmentRepository: any;
@@ -22,6 +24,8 @@ export let codeReviewSettingRepository: any;
 export let reviewerScopeTypeRepository: any;
 export let iterationStatusRepository: any;
 export let iterationRepository: any;
+export let memberRepository: any;
+export let memberRoleRepository: any;
 
 export const initRepository = () => {
   userRepository = getRepository(User);
@@ -35,4 +39,6 @@ export const initRepository = () => {
   reviewerScopeTypeRepository = getRepository(ReviewerScopeType);
   iterationStatusRepository = getRepository(IterationStatus);
   iterationRepository = getRepository(Iteration);
+  memberRepository = getRepository(Member);
+  memberRoleRepository = getRepository(MemberRole);
 };
