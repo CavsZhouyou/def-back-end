@@ -8,6 +8,8 @@ import { PublishType } from '@entity/PublishType';
 import { App } from '@entity/App';
 import { CodeReviewSetting } from '@entity/CodeReviewSetting';
 import { ReviewerScopeType } from '@entity/ReviewerScopeType';
+import { IterationStatus } from '@entity/IterationStatus';
+import { Iteration } from '@entity/Iteration';
 
 export let userRepository: any;
 export let departmentRepository: any;
@@ -18,6 +20,8 @@ export let publishTypeRepository: any;
 export let appRepository: any;
 export let codeReviewSettingRepository: any;
 export let reviewerScopeTypeRepository: any;
+export let iterationStatusRepository: any;
+export let iterationRepository: any;
 
 export const initRepository = () => {
   userRepository = getRepository(User);
@@ -29,4 +33,6 @@ export const initRepository = () => {
   appRepository = getRepository(App);
   codeReviewSettingRepository = getRepository(CodeReviewSetting);
   reviewerScopeTypeRepository = getRepository(ReviewerScopeType);
+  iterationStatusRepository = getRepository(IterationStatus);
+  iterationRepository = getRepository(Iteration);
 };

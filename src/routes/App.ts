@@ -120,7 +120,7 @@ router.post('/getMyAppList', async (req: Request, res: Response) => {
 });
 
 /******************************************************************************
- *            获取应用分支列表 - "POST/def/app/getAppBranchList"
+ *            获取应用分支列表 - "POST/def/app/getAppBranches"
  ******************************************************************************/
 
 router.post('/getAppBranches', async (req: Request, res: Response) => {

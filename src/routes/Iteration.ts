@@ -9,6 +9,8 @@ import {
   reviewerScopeTypeRepository,
   publishTypeRepository,
   productTypeRepository,
+  iterationStatusRepository,
+  iterationRepository,
 } from '@shared/repositories';
 import { App } from '@entity/App';
 
@@ -88,24 +90,10 @@ router.post('/getIterationList', async (req: Request, res: Response) => {
  ******************************************************************************/
 
 router.post('/createIteration', async (req: Request, res: Response) => {
-  const {
-    userId,
-    appName,
-    repository,
-    description,
-    productTypeId,
-    publishTypeId,
-  } = req.body;
+  const { userId, appId, branch, iterationName, description } = req.body;
 
   if (
-    !(
-      userId &&
-      appName &&
-      repository &&
-      description &&
-      productTypeId &&
-      publishTypeId
-    )
+    !(userId && appId && branch && description && iterationName && description)
   ) {
     return res.status(OK).json({
       success: false,
@@ -113,45 +101,38 @@ router.post('/createIteration', async (req: Request, res: Response) => {
     });
   }
 
-  const onlineAddress = '暂无发布';
-  const pagePrefix = '/webapp/publish';
-  const codeReviewSetting = codeReviewSettingRepository.create({
-    isOpen: true,
-    reviewerScope: await reviewerScopeTypeRepository.findOne(),
-  });
-  const creator = await userRepository.findOne({ userId });
-  const publishType = await publishTypeRepository.findOne({
-    code: publishTypeId,
-  });
-  const appLogo = publishType.logo;
-  const productType = await productTypeRepository.findOne({
-    code: productTypeId,
-  });
+  const version = branch.split('/')[1];
   const createTime = new Date().getTime();
-  const progressingIterationCount = 0;
-
-  const app = appRepository.create({
-    appName,
-    description,
-    appLogo,
-    repository,
-    onlineAddress,
-    pagePrefix,
-    createTime,
-    codeReviewSetting,
-    creator,
-    publishType,
-    productType,
-    progressingIterationCount,
+  const endTime = '0';
+  const master = 'master';
+  const creator = await userRepository.findOne({ userId });
+  const app = await appRepository.findOne({ appId });
+  const iterationStatus = await iterationStatusRepository.findOne({
+    code: '3002',
   });
 
-  const savedApp = await appRepository.save(app);
+  const iteration = iterationRepository.create({
+    iterationName,
+    description,
+    version,
+    createTime,
+    endTime,
+    branch,
+    master,
+    iterationStatus,
+    creator,
+    app,
+  });
+
+  const savedIteration = await iterationRepository.save(iteration);
 
   return res.status(OK).json({
     success: true,
     data: {
-      appId: savedApp.appId,
-      appName: savedApp.appName,
+      appId: app.appId,
+      appName: app.appName,
+      iterationId: savedIteration.iterationId,
+      iterationName: savedIteration.iterationName,
     },
   });
 });
