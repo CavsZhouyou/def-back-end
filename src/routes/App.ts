@@ -308,6 +308,42 @@ router.post('/addAppMember', async (req: Request, res: Response) => {
     success: true,
   });
 });
+
+/******************************************************************************
+ *            修改应用基本信息 - "POST/def/app/editBasicInfo"
+ ******************************************************************************/
+
+router.post('/editBasicInfo', async (req: Request, res: Response) => {
+  const { appId, userId, description, product } = req.body;
+
+  if (!(appId && userId && description && product)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const app = await appRepository.findOne({
+    appId,
+  });
+  const user = await userRepository.findOne({
+    userId,
+  });
+  const productType = await productTypeRepository.findOne({
+    code: product,
+  });
+
+  //TODO: 插入动态信息
+
+  app.description = description;
+  app.productType = productType;
+
+  await appRepository.save(app);
+
+  return res.status(OK).json({
+    success: true,
+  });
+});
 /******************************************************************************
  *                                 Export Router
  ******************************************************************************/
