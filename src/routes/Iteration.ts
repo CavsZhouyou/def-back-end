@@ -13,64 +13,65 @@ import {
   iterationRepository,
 } from '@shared/repositories';
 import { App } from '@entity/App';
+import { Iteration } from '@entity/Iteration';
 
 // Init shared
 const router = Router().use(loginMW);
 
 /******************************************************************************
- *                      获取迭代列表 - "POST/def/iteration/getIterationList"
+ *               获取迭代列表 - "POST/def/iteration/getIterationList"
  ******************************************************************************/
 
 router.post('/getIterationList', async (req: Request, res: Response) => {
-  const { userId, appName, publishType, page, pageSize } = req.body;
+  const { userId, appId, creator, iterationStatus, page, pageSize } = req.body;
 
-  if (!(page && pageSize && publishType)) {
+  if (!(page && pageSize && userId && iterationStatus)) {
     return res.status(OK).json({
       success: false,
       message: paramMissingError,
     });
   }
 
-  let apps: App[] = [];
+  let iterations: Iteration[] = [];
   let queryOptions: any = {};
   let hasMore = true;
   let total = 0;
   const dataStart = (page - 1) * pageSize;
   const relations = ['iterations', 'publishType'];
 
-  if (appName) queryOptions.appName = appName;
-  if (publishType.length >= 1)
-    queryOptions.publishType = await publishTypeRepository.findOne({
-      code: publishType[0],
-    });
-  if (userId)
-    queryOptions.creator = await userRepository.findOne({
-      userId,
-    });
+  // if (appName) queryOptions.appName = appName;
+  // if (publishType.length >= 1)
+  //   queryOptions.publishType = await publishTypeRepository.findOne({
+  //     code: publishType[0],
+  //   });
+  // if (userId)
+  //   queryOptions.creator = await userRepository.findOne({
+  //     userId,
+  //   });
 
-  // 用户列表查询
-  apps = await appRepository.find({
-    where: {
-      ...queryOptions,
-    },
-    relations,
-  });
-  total = apps.length;
+  // // 用户列表查询
+  // apps = await appRepository.find({
+  //   where: {
+  //     ...queryOptions,
+  //   },
+  //   relations,
+  // });
+  // total = apps.length;
 
-  if (dataStart > total) {
-    return res.status(OK).json({
-      success: false,
-      message: '超出数据范围！',
-    });
-  } else {
-    hasMore = dataStart + pageSize < total;
+  // if (dataStart > total) {
+  //   return res.status(OK).json({
+  //     success: false,
+  //     message: '超出数据范围！',
+  //   });
+  // } else {
+  //   hasMore = dataStart + pageSize < total;
 
-    if (hasMore) {
-      apps = apps.slice(dataStart, pageSize);
-    } else {
-      apps = apps.slice(dataStart);
-    }
-  }
+  //   if (hasMore) {
+  //     apps = apps.slice(dataStart, pageSize);
+  //   } else {
+  //     apps = apps.slice(dataStart);
+  //   }
+  // }
 
   return res.status(OK).json({
     success: true,

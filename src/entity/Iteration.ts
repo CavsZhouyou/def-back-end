@@ -6,6 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
   Column,
+  ManyToMany,
 } from 'typeorm';
 import { IterationStatus } from './IterationStatus';
 import { User } from './User';
@@ -52,4 +53,7 @@ export class Iteration {
 
   @OneToMany((type) => Publish, (publish) => publish.iteration)
   publishes: Publish[];
+
+  @ManyToMany((type) => User, (user) => user.joinedApps)
+  participants: User[];
 }
