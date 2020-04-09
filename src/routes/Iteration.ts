@@ -48,6 +48,7 @@ router.post('/getIterationList', async (req: Request, res: Response) => {
     });
 
   // 用户列表查询
+  // TODO: 现在为用户创建的迭代，和发布关联后需要查询用户参与的迭代
   iterations = await iterationRepository.find({
     where: {
       ...queryOptions,

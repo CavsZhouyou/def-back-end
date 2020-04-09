@@ -85,6 +85,69 @@ router.post('/getAppList', async (req: Request, res: Response) => {
 });
 
 /******************************************************************************
+ *         获取我的应用列表（通过 count） - "POST/def/app/getAppListByCount"
+ ******************************************************************************/
+
+router.post('/getAppListByCount', async (req: Request, res: Response) => {
+  const { userId, publishType, count, loadedCount } = req.body;
+
+  if (!(userId && count && loadedCount >= 0 && publishType)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  let apps: App[] = [];
+  let queryOptions: any = {};
+  let hasMore = true;
+  let total = 0;
+  const dataStart = loadedCount;
+  const relations = ['iterations', 'publishType'];
+
+  if (publishType.length >= 1)
+    queryOptions.publishType = await publishTypeRepository.findOne({
+      code: publishType[0],
+    });
+  queryOptions.creator = await userRepository.findOne({
+    userId,
+  });
+
+  // 用户列表查询
+  apps = await appRepository.find({
+    where: {
+      ...queryOptions,
+    },
+    relations,
+  });
+  total = apps.length;
+
+  if (dataStart > total) {
+    return res.status(OK).json({
+      success: false,
+      message: '超出数据范围！',
+    });
+  } else {
+    hasMore = dataStart + count < total;
+
+    if (hasMore) {
+      apps = apps.slice(dataStart, count);
+    } else {
+      apps = apps.slice(dataStart);
+    }
+  }
+
+  return res.status(OK).json({
+    success: true,
+    data: {
+      hasMore,
+      total,
+      list: apps,
+    },
+  });
+});
+
+/******************************************************************************
  *            获取我的应用列表(app option) - "POST/def/app/getMyAppList"
  ******************************************************************************/
 
