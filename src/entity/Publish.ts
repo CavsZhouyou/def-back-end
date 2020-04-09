@@ -4,11 +4,10 @@ import {
   OneToOne,
   ManyToOne,
   JoinColumn,
-  Column
+  Column,
 } from 'typeorm';
 import { PublishEnvironment } from './PublishEnvironment';
 import { PublishStatus } from './PublishStatus';
-import { PublishType } from './PublishType';
 import { User } from './User';
 import { Log } from './Log';
 import { Iteration } from './Iteration';
@@ -25,41 +24,31 @@ export class Publish {
   @Column()
   commit: string;
 
-  @OneToOne(
-    type => Log,
-    log => log.publish
-  )
+  @OneToOne((type) => Log, (log) => log.publish, {
+    cascade: true,
+  })
   @JoinColumn()
   log: Log;
 
-  @OneToOne(
-    type => Review,
-    review => review.publish
-  )
+  @OneToOne((type) => Review, (review) => review.publish)
   @JoinColumn()
-  review: Review;
+  review?: Review;
 
   @ManyToOne(
-    type => PublishEnvironment,
-    publishEnvironment => publishEnvironment.publishes
+    (type) => PublishEnvironment,
+    (publishEnvironment) => publishEnvironment.publishes
   )
   publishEnvironment: PublishEnvironment;
 
   @ManyToOne(
-    type => PublishStatus,
-    publishStatus => publishStatus.publishes
+    (type) => PublishStatus,
+    (publishStatus) => publishStatus.publishes
   )
   publishStatus: PublishStatus;
 
-  @ManyToOne(
-    type => User,
-    user => user.createdPublishes
-  )
+  @ManyToOne((type) => User, (user) => user.createdPublishes)
   publisher: User;
 
-  @ManyToOne(
-    type => Iteration,
-    iteration => iteration.publishes
-  )
+  @ManyToOne((type) => Iteration, (iteration) => iteration.publishes)
   iteration: Iteration;
 }

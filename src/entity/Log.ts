@@ -9,9 +9,6 @@ export class Log {
   @Column()
   content: string;
 
-  @OneToOne(
-    type => Publish,
-    publish => publish.log
-  )
+  @OneToOne((type) => Publish, (publish) => publish.log)
   publish: Publish;
 }

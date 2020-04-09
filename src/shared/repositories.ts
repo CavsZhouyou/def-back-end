@@ -13,6 +13,11 @@ import { Iteration } from '@entity/Iteration';
 import { Member } from '@entity/Member';
 import { MemberRole } from '@entity/MemberRole';
 import { Dynamic } from '@entity/Dynamic';
+import { PublishStatus } from '@entity/PublishStatus';
+import { PublishEnvironment } from '@entity/PublishEnvironment';
+import { Log } from '@entity/Log';
+import { Publish } from '@entity/Publish';
+import { Review } from '@entity/Review';
 
 export let userRepository: any;
 export let departmentRepository: any;
@@ -28,6 +33,11 @@ export let iterationRepository: any;
 export let memberRepository: any;
 export let memberRoleRepository: any;
 export let dynamicRepository: any;
+export let publishStatusRepository: any;
+export let publishEnvironmentRepository: any;
+export let logRepository: any;
+export let publishRepository: any;
+export let reviewRepository: any;
 
 export const initRepository = () => {
   userRepository = getRepository(User);
@@ -44,4 +54,9 @@ export const initRepository = () => {
   memberRepository = getRepository(Member);
   memberRoleRepository = getRepository(MemberRole);
   dynamicRepository = getRepository(Dynamic);
+  publishStatusRepository = getRepository(PublishStatus);
+  publishEnvironmentRepository = getRepository(PublishEnvironment);
+  logRepository = getRepository(Log);
+  publishRepository = getRepository(Publish);
+  reviewRepository = getRepository(Review);
 };
