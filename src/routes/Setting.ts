@@ -5,6 +5,7 @@ import { loginMW } from './middleware';
 import {
   appRepository,
   codeReviewSettingRepository,
+  reviewerScopeTypeRepository,
 } from '@shared/repositories';
 
 // Init shared
@@ -54,6 +55,51 @@ router.post('/getCodeReviewSetting', async (req: Request, res: Response) => {
   });
 });
 
+/******************************************************************************
+ *            修改代码审阅设置 - "POST/def/setting/editCodeReviewSetting"
+ ******************************************************************************/
+
+router.post('/editCodeReviewSetting', async (req: Request, res: Response) => {
+  const { appId, isOpen, userId, reviewerScope: reviewerScopeCode } = req.body;
+
+  if (!(appId && isOpen !== undefined && userId && reviewerScopeCode)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const app = await appRepository.findOne(
+    {
+      appId,
+    },
+    {
+      relations: ['codeReviewSetting'],
+    }
+  );
+
+  const codeReviewSetting = await codeReviewSettingRepository.findOne(
+    {
+      id: app.codeReviewSetting.id,
+    },
+    {
+      relations: ['reviewerScope'],
+    }
+  );
+
+  const reviewerScope = await reviewerScopeTypeRepository.findOne({
+    code: reviewerScopeCode,
+  });
+
+  codeReviewSetting.isOpen = isOpen;
+  codeReviewSetting.reviewerScope = reviewerScope;
+
+  await codeReviewSettingRepository.save(codeReviewSetting);
+
+  return res.status(OK).json({
+    success: true,
+  });
+});
 /***
 /******************************************************************************
  *                                 Export Router
