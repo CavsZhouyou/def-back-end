@@ -162,6 +162,10 @@ router.post('/createIteration', async (req: Request, res: Response) => {
 
   const savedIteration = await iterationRepository.save(iteration);
 
+  // 对应应用进行中的迭代数加 1
+  app.progressingIterationCount = app.progressingIterationCount + 1;
+  await appRepository.save(app);
+
   return res.status(OK).json({
     success: true,
     data: {
