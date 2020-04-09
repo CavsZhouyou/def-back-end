@@ -7,6 +7,7 @@ import {
   codeReviewSettingRepository,
   reviewerScopeTypeRepository,
 } from '@shared/repositories';
+import { addDynamic } from 'src/utils';
 
 // Init shared
 const router = Router().use(loginMW);
@@ -91,6 +92,19 @@ router.post('/editCodeReviewSetting', async (req: Request, res: Response) => {
     code: reviewerScopeCode,
   });
 
+  // 添加应用动态
+  if (codeReviewSetting.isOpen !== isOpen) {
+    const content = `${isOpen ? '开启' : '关闭'}了代码审阅`;
+    await addDynamic(userId, appId, content);
+  } else if (
+    isOpen &&
+    codeReviewSetting.reviewerScope.code !== reviewerScopeCode
+  ) {
+    const content = `修改代码审阅可选审阅人范围为 ${reviewerScope.name}`;
+    await addDynamic(userId, appId, content);
+  }
+
+  // 保存设置
   codeReviewSetting.isOpen = isOpen;
   codeReviewSetting.reviewerScope = reviewerScope;
 

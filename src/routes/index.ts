@@ -6,6 +6,7 @@ import IterationRouter from './Iteration';
 import ConstantsRouter from './Constants';
 import MemberRouter from './Member';
 import SettingRouter from './Setting';
+import DynamicRouter from './Dynamic';
 
 // Init router and path
 const router = Router();
@@ -18,6 +19,7 @@ router.use('/iteration', IterationRouter);
 router.use('/constants', ConstantsRouter);
 router.use('/member', MemberRouter);
 router.use('/setting', SettingRouter);
+router.use('/dynamic', DynamicRouter);
 
 // Export the base-router
 export default router;

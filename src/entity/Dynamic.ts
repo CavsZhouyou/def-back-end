@@ -13,15 +13,9 @@ export class Dynamic {
   @Column()
   operateTime: string;
 
-  @ManyToOne(
-    type => User,
-    user => user.createdDynamics
-  )
+  @ManyToOne((type) => User, (user) => user.createdDynamics)
   creator: User;
 
-  @ManyToOne(
-    type => App,
-    app => app.dynamics
-  )
+  @ManyToOne((type) => App, (app) => app.dynamics)
   app: App;
 }

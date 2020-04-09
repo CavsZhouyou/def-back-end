@@ -12,6 +12,7 @@ import { IterationStatus } from '@entity/IterationStatus';
 import { Iteration } from '@entity/Iteration';
 import { Member } from '@entity/Member';
 import { MemberRole } from '@entity/MemberRole';
+import { Dynamic } from '@entity/Dynamic';
 
 export let userRepository: any;
 export let departmentRepository: any;
@@ -26,6 +27,7 @@ export let iterationStatusRepository: any;
 export let iterationRepository: any;
 export let memberRepository: any;
 export let memberRoleRepository: any;
+export let dynamicRepository: any;
 
 export const initRepository = () => {
   userRepository = getRepository(User);
@@ -41,4 +43,5 @@ export const initRepository = () => {
   iterationRepository = getRepository(Iteration);
   memberRepository = getRepository(Member);
   memberRoleRepository = getRepository(MemberRole);
+  dynamicRepository = getRepository(Dynamic);
 };
