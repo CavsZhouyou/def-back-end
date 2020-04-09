@@ -56,9 +56,9 @@ router.post('/getUserList', async (req: Request, res: Response) => {
     hasMore = dataStart + pageSize < total;
 
     if (hasMore) {
-      users = users.slice(dataStart, pageSize);
+      users = users.splice(dataStart, pageSize);
     } else {
-      users = users.slice(dataStart);
+      users = users.splice(dataStart);
     }
   }
 

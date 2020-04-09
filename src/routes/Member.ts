@@ -74,9 +74,9 @@ router.post('/getAppMemberList', async (req: Request, res: Response) => {
     hasMore = dataStart + pageSize < total;
 
     if (hasMore) {
-      members = members.slice(dataStart, pageSize);
+      members = members.splice(dataStart, pageSize);
     } else {
-      members = members.slice(dataStart);
+      members = members.splice(dataStart);
     }
   }
 

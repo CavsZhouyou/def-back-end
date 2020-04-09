@@ -46,7 +46,6 @@ router.post('/getDynamicList', async (req: Request, res: Response) => {
         operateTime: 'DESC',
       },
     });
-    total = dynamics.length;
   } else if (userId) {
     // 查询用户关联仓库的动态列表
     const user = await userRepository.findOne(
@@ -82,6 +81,8 @@ router.post('/getDynamicList', async (req: Request, res: Response) => {
     });
   }
 
+  total = dynamics.length;
+
   if (dataStart > total) {
     return res.status(OK).json({
       success: false,
@@ -91,9 +92,9 @@ router.post('/getDynamicList', async (req: Request, res: Response) => {
     hasMore = dataStart + count < total;
 
     if (hasMore) {
-      dynamics = dynamics.slice(dataStart, count);
+      dynamics = dynamics.splice(dataStart, count);
     } else {
-      dynamics = dynamics.slice(dataStart);
+      dynamics = dynamics.splice(dataStart);
     }
   }
 
@@ -117,6 +118,8 @@ router.post('/getDynamicList', async (req: Request, res: Response) => {
     success: true,
     data: {
       list: formattedDynamics,
+      hasMore,
+      total,
     },
   });
 });

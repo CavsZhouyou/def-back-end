@@ -66,9 +66,9 @@ router.post('/getIterationList', async (req: Request, res: Response) => {
     hasMore = dataStart + pageSize < total;
 
     if (hasMore) {
-      iterations = iterations.slice(dataStart, pageSize);
+      iterations = iterations.splice(dataStart, pageSize);
     } else {
-      iterations = iterations.slice(dataStart);
+      iterations = iterations.splice(dataStart);
     }
   }
 

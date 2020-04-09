@@ -66,9 +66,9 @@ router.post('/getAppList', async (req: Request, res: Response) => {
     hasMore = dataStart + pageSize < total;
 
     if (hasMore) {
-      apps = apps.slice(dataStart, pageSize);
+      apps = apps.splice(dataStart, pageSize);
     } else {
-      apps = apps.slice(dataStart);
+      apps = apps.splice(dataStart);
     }
   }
 
@@ -131,9 +131,9 @@ router.post('/getAppListByCount', async (req: Request, res: Response) => {
     hasMore = dataStart + count < total;
 
     if (hasMore) {
-      apps = apps.slice(dataStart, count);
+      apps = apps.splice(dataStart, count);
     } else {
-      apps = apps.slice(dataStart);
+      apps = apps.splice(dataStart);
     }
   }
 
