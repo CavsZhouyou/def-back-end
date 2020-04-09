@@ -10,6 +10,7 @@ import {
 } from '@shared/repositories';
 import { Dynamic } from '@entity/Dynamic';
 import { Member } from '@entity/Member';
+import { App } from '@entity/App';
 
 // Init shared
 const router = Router().use(loginMW);
@@ -57,8 +58,9 @@ router.post('/getDynamicList', async (req: Request, res: Response) => {
       }
     );
     let { joinedApps } = user;
+    const apps: App[] = [];
 
-    joinedApps = joinedApps.map(async (item: Member) => {
+    joinedApps.map(async (item: Member) => {
       const member = await memberRepository.findOne(
         {
           ...item,
@@ -68,11 +70,11 @@ router.post('/getDynamicList', async (req: Request, res: Response) => {
         }
       );
 
-      return member.app;
+      apps.push(member.app);
     });
 
     dynamics = await dynamicRepository.find({
-      where: joinedApps,
+      where: apps,
       relations: ['creator', 'app'],
       order: {
         operateTime: 'DESC',
