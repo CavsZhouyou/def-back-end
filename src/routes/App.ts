@@ -293,6 +293,20 @@ router.post('/createApp', async (req: Request, res: Response) => {
 
   const savedApp = await appRepository.save(app);
 
+  // 添加应用创建者
+  const memberRole = await memberRoleRepository.findOne({
+    roleId: '5001',
+  });
+  const savedMember = memberRepository.create({
+    joinTime: new Date().getTime(),
+    expiredTime: '9999',
+    role: memberRole,
+    app,
+    user: creator,
+  });
+
+  await memberRepository.save(savedMember);
+
   return res.status(OK).json({
     success: true,
     data: {

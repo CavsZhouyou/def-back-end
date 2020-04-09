@@ -50,7 +50,10 @@ router.post('/getAppMemberList', async (req: Request, res: Response) => {
     const { user, role, joinTime, expiredTime } = item;
     const { userId, userName, userAvatar } = user;
 
-    if (parseInt(expiredTime) > new Date().getTime()) {
+    if (
+      parseInt(expiredTime) > new Date().getTime() ||
+      expiredTime === '9999' // 创建者
+    ) {
       members.push({
         userId,
         userName,
