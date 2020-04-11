@@ -4,7 +4,7 @@
  * @TodoList: 无
  * @Date: 2020-04-09 14:16:46
  * @Last Modified by: zhouyou@werun
- * @Last Modified time: 2020-04-09 14:52:45
+ * @Last Modified time: 2020-04-11 18:19:45
  */
 
 import {
@@ -41,6 +41,12 @@ export const addDynamic = async (
   await dynamicRepository.save(dynamic);
 };
 
+/**
+ * 异步 foreach
+ *
+ * @param {any[]} array
+ * @param {(item: any, index: number, array: any[]) => void} callback
+ */
 export async function asyncForEach(
   array: any[],
   callback: (item: any, index: number, array: any[]) => void

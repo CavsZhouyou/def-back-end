@@ -122,8 +122,8 @@ router.post('/getAppMemberOptions', async (req: Request, res: Response) => {
   });
 
   originMembers.forEach((item: Member) => {
-    const { user, role, joinTime, expiredTime } = item;
-    const { userId, userName, userAvatar } = user;
+    const { user, expiredTime } = item;
+    const { userId, userName } = user;
 
     if (
       parseInt(expiredTime) > new Date().getTime() ||
