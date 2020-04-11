@@ -7,8 +7,10 @@ import {
   appRepository,
   iterationStatusRepository,
   iterationRepository,
+  publishRepository,
 } from '@shared/repositories';
 import { Iteration } from '@entity/Iteration';
+import { asyncForEach } from 'src/utils';
 
 // Init shared
 const router = Router().use(loginMW);
@@ -74,7 +76,7 @@ router.post('/getIterationList', async (req: Request, res: Response) => {
 
   const formattedIterations: any[] = [];
 
-  iterations.forEach((item: Iteration) => {
+  await asyncForEach(iterations, async (item: Iteration) => {
     const {
       iterationId,
       version,
@@ -90,8 +92,14 @@ router.post('/getIterationList', async (req: Request, res: Response) => {
 
     const { appId, appLogo, appName } = app;
     const { userName: creatorName, userAvatar: creatorAvatar } = creator;
-
-    //TODO: publish 处理
+    const completePublishes = await publishRepository.find({
+      where: publishes,
+      relations: ['publishStatus'],
+    });
+    const {
+      createTime: latestPublish,
+      publishStatus: { code: latestPublishStatus },
+    } = completePublishes[0];
 
     formattedIterations.push({
       appId,
@@ -106,6 +114,8 @@ router.post('/getIterationList', async (req: Request, res: Response) => {
       endTime,
       branch,
       iterationStatus: iterationStatus.code,
+      latestPublish,
+      latestPublishStatus,
     });
   });
 
