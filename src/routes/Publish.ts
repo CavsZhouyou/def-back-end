@@ -182,9 +182,7 @@ router.post('/getAppPublishList', async (req: Request, res: Response) => {
     pageSize,
   } = req.body;
 
-  if (
-    !(appId && publishEnv && publishStatus && publisherId && page && pageSize)
-  ) {
+  if (!(appId && publishEnv && publishStatus && page && pageSize)) {
     return res.status(OK).json({
       success: false,
       message: paramMissingError,
@@ -213,15 +211,15 @@ router.post('/getAppPublishList', async (req: Request, res: Response) => {
     queryOptions.iteration = await iterationRepository.findOne({
       iterationId,
     });
-  if (publisherId.length >= 1)
+  if (publisherId && publisherId.length >= 1)
     queryOptions.publisher = await userRepository.findOne({
       userId: publisherId[0],
     });
-  if (publishStatus.length >= 1)
+  if (publishStatus && publishStatus.length >= 1)
     queryOptions.publishStatus = await publishStatusRepository.findOne({
       code: publishStatus[0],
     });
-  if (publishEnv.length >= 1)
+  if (publishEnv && publishEnv.length >= 1)
     queryOptions.publishEnvironment = await publishEnvironmentRepository.findOne(
       {
         code: publishEnv[0],
@@ -294,6 +292,103 @@ router.post('/getAppPublishList', async (req: Request, res: Response) => {
       hasMore,
       total,
       list: formattedPublishes,
+    },
+  });
+});
+
+/******************************************************************************
+ *            获取发布详情 - "POST/def/publish/getAppPublishDetail"
+ ******************************************************************************/
+router.post('/getAppPublishDetail', async (req: Request, res: Response) => {
+  const { publishId } = req.body;
+
+  if (!publishId) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const publish = await publishRepository.findOne(
+    {
+      publishId,
+    },
+    {
+      relations: [
+        'publishEnvironment',
+        'publishStatus',
+        'iteration',
+        'publisher',
+        'review',
+      ],
+    }
+  );
+
+  const {
+    createTime,
+    publisher,
+    commit,
+    publishEnvironment,
+    publishStatus,
+    review,
+  } = publish;
+
+  const { userName, userAvatar } = publisher;
+  const completeReview = await reviewRepository.findOne(
+    {
+      ...review,
+    },
+    {
+      relations: ['reviewStatus'],
+    }
+  );
+  const { reviewId, reviewStatus, failReason } = completeReview || {};
+
+  return res.status(OK).json({
+    success: true,
+    data: {
+      publishId,
+      publisher: userName,
+      publisherAvatar: userAvatar,
+      commit,
+      createTime,
+      publishEnv: publishEnvironment.code,
+      publishStatus: publishStatus.code,
+      reviewId,
+      reviewStatus,
+      failReason,
+    },
+  });
+});
+
+/******************************************************************************
+ *            获取发布日志 - "POST/def/publish/getAppPublishLog"
+ ******************************************************************************/
+router.post('/getAppPublishLog', async (req: Request, res: Response) => {
+  const { publishId } = req.body;
+
+  if (!publishId) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const publish = await publishRepository.findOne(
+    {
+      publishId,
+    },
+    {
+      relations: ['log'],
+    }
+  );
+
+  const { log } = publish;
+
+  return res.status(OK).json({
+    success: true,
+    data: {
+      log: log.content,
     },
   });
 });

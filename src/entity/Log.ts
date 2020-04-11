@@ -6,7 +6,7 @@ export class Log {
   @PrimaryGeneratedColumn()
   logId: number;
 
-  @Column()
+  @Column('text')
   content: string;
 
   @OneToOne((type) => Publish, (publish) => publish.log)
