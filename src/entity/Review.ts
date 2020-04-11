@@ -4,7 +4,7 @@ import {
   OneToOne,
   JoinColumn,
   Column,
-  ManyToOne
+  ManyToOne,
 } from 'typeorm';
 import { User } from './User';
 import { ReviewStatus } from './ReviewStatus';
@@ -24,27 +24,15 @@ export class Review {
   @Column()
   failReason: string;
 
-  @OneToOne(
-    type => Publish,
-    publish => publish.review
-  )
+  @OneToOne((type) => Publish, (publish) => publish.review)
   publish: Publish;
 
-  @ManyToOne(
-    type => User,
-    user => user.createdReviews
-  )
+  @ManyToOne((type) => User, (user) => user.createdReviews)
   creator: User;
 
-  @ManyToOne(
-    type => User,
-    user => user.reviews
-  )
+  @ManyToOne((type) => User, (user) => user.reviews)
   reviewer: User;
 
-  @ManyToOne(
-    type => ReviewStatus,
-    reviewStatus => reviewStatus.reviews
-  )
+  @ManyToOne((type) => ReviewStatus, (reviewStatus) => reviewStatus.reviews)
   reviewStatus: ReviewStatus;
 }
