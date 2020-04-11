@@ -12,6 +12,7 @@ import { User } from './User';
 import { Log } from './Log';
 import { Iteration } from './Iteration';
 import { Review } from './Review';
+import { App } from './App';
 
 @Entity()
 export class Publish {
@@ -32,7 +33,7 @@ export class Publish {
 
   @OneToOne((type) => Review, (review) => review.publish)
   @JoinColumn()
-  review?: Review;
+  review: Review;
 
   @ManyToOne(
     (type) => PublishEnvironment,
@@ -51,4 +52,7 @@ export class Publish {
 
   @ManyToOne((type) => Iteration, (iteration) => iteration.publishes)
   iteration: Iteration;
+
+  @ManyToOne((type) => App, (app) => app.publishes)
+  app: App;
 }

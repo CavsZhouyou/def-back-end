@@ -14,6 +14,7 @@ import { Iteration } from './Iteration';
 import { PublishType } from './PublishType';
 import { ProductType } from './ProductType';
 import { CodeReviewSetting } from './CodeReviewSetting';
+import { Publish } from './Publish';
 
 @Entity()
 export class App {
@@ -58,6 +59,9 @@ export class App {
 
   @OneToMany((type) => Iteration, (iteration) => iteration.app)
   iterations: Iteration[];
+
+  @OneToMany((type) => Publish, (publish) => publish.app)
+  publishes: Publish[];
 
   @ManyToOne((type) => User, (user) => user.createdApps)
   creator: User;

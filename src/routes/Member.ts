@@ -93,6 +93,57 @@ router.post('/getAppMemberList', async (req: Request, res: Response) => {
 });
 
 /******************************************************************************
+ *            获取应用成员列表(option) - "POST/def/member/getAppMemberOptions"
+ ******************************************************************************/
+
+router.post('/getAppMemberOptions', async (req: Request, res: Response) => {
+  const { appId } = req.body;
+
+  if (!appId) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const app = await appRepository.findOne({
+    appId,
+  });
+
+  let members: any[] = [];
+  const relations = ['user'];
+
+  // 用户列表查询
+  const originMembers = await memberRepository.find({
+    where: {
+      app,
+    },
+    relations,
+  });
+
+  originMembers.forEach((item: Member) => {
+    const { user, role, joinTime, expiredTime } = item;
+    const { userId, userName, userAvatar } = user;
+
+    if (
+      parseInt(expiredTime) > new Date().getTime() ||
+      expiredTime === '9999' // 创建者
+    ) {
+      members.push({
+        userId,
+        userName,
+      });
+    }
+  });
+
+  return res.status(OK).json({
+    success: true,
+    data: {
+      list: members,
+    },
+  });
+});
+/******************************************************************************
  *            添加应用成员 - "POST/def/member/addAppMember"
  ******************************************************************************/
 
