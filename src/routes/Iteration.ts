@@ -188,6 +188,57 @@ router.post('/createIteration', async (req: Request, res: Response) => {
 });
 
 /******************************************************************************
+ *               获取迭代详情 - "POST/def/iteration/getIterationDetail"
+ ******************************************************************************/
+
+router.post('/getIterationDetail', async (req: Request, res: Response) => {
+  const { iterationId } = req.body;
+
+  if (!iterationId) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const iteration = await iterationRepository.findOne(
+    {
+      iterationId,
+    },
+    {
+      relations: ['app', 'creator', 'iterationStatus', 'publishes'],
+    }
+  );
+
+  const {
+    version,
+    description,
+    iterationName,
+    createTime,
+    branch,
+    creator,
+    master,
+    iterationStatus,
+  } = iteration;
+
+  const { userName } = creator;
+
+  return res.status(OK).json({
+    success: true,
+    data: {
+      creator: userName,
+      description,
+      master,
+      version,
+      iterationName,
+      createTime,
+      branch,
+      iterationStatus: iterationStatus.code,
+    },
+  });
+});
+
+/******************************************************************************
  *                                 Export Router
  ******************************************************************************/
 
