@@ -342,7 +342,11 @@ router.post('/getAppPublishDetail', async (req: Request, res: Response) => {
       relations: ['reviewStatus'],
     }
   );
-  const { reviewId, reviewStatus, failReason } = completeReview || {};
+  const {
+    reviewId,
+    reviewStatus: { code: reviewStatus },
+    failReason,
+  } = completeReview || {};
 
   return res.status(OK).json({
     success: true,

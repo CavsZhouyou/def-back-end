@@ -18,6 +18,7 @@ import { PublishEnvironment } from '@entity/PublishEnvironment';
 import { Log } from '@entity/Log';
 import { Publish } from '@entity/Publish';
 import { Review } from '@entity/Review';
+import { ReviewStatus } from '@entity/ReviewStatus';
 
 export let userRepository: any;
 export let departmentRepository: any;
@@ -38,6 +39,7 @@ export let publishEnvironmentRepository: any;
 export let logRepository: any;
 export let publishRepository: any;
 export let reviewRepository: any;
+export let reviewStatusRepository: any;
 
 export const initRepository = () => {
   userRepository = getRepository(User);
@@ -59,4 +61,5 @@ export const initRepository = () => {
   logRepository = getRepository(Log);
   publishRepository = getRepository(Publish);
   reviewRepository = getRepository(Review);
+  reviewStatusRepository = getRepository(ReviewStatus);
 };

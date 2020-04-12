@@ -31,7 +31,9 @@ export class Publish {
   @JoinColumn()
   log: Log;
 
-  @OneToOne((type) => Review, (review) => review.publish)
+  @OneToOne((type) => Review, (review) => review.publish, {
+    cascade: true,
+  })
   @JoinColumn()
   review: Review;
 

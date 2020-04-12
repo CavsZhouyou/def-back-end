@@ -21,7 +21,9 @@ export class Review {
   @Column()
   createTime: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   failReason: string;
 
   @OneToOne((type) => Publish, (publish) => publish.review)

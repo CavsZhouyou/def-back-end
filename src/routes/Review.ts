@@ -5,8 +5,11 @@ import { loginMW } from './middleware';
 import {
   appRepository,
   codeReviewSettingRepository,
-  reviewerScopeTypeRepository,
   memberRepository,
+  publishRepository,
+  userRepository,
+  reviewStatusRepository,
+  reviewRepository,
 } from '@shared/repositories';
 import { Member } from '@entity/Member';
 
@@ -18,9 +21,9 @@ const router = Router().use(loginMW);
  ******************************************************************************/
 
 router.post('/getReviewerOptions', async (req: Request, res: Response) => {
-  const { appId } = req.body;
+  const { appId, creatorId } = req.body;
 
-  if (!appId) {
+  if (!(appId && creatorId)) {
     return res.status(OK).json({
       success: false,
       message: paramMissingError,
@@ -78,7 +81,8 @@ router.post('/getReviewerOptions', async (req: Request, res: Response) => {
     if (
       (parseInt(expiredTime) > new Date().getTime() ||
         expiredTime === '9999') &&
-      roles.indexOf(role.roleId) > -1
+      roles.indexOf(role.roleId) > -1 &&
+      (creatorId !== userId || role.roleId === '5001')
     ) {
       members.push({
         userId,
@@ -95,6 +99,52 @@ router.post('/getReviewerOptions', async (req: Request, res: Response) => {
   });
 });
 
+/******************************************************************************
+ *            获取申请代码审阅 - "POST/def/review/applyCodeReview"
+ ******************************************************************************/
+
+router.post('/applyCodeReview', async (req: Request, res: Response) => {
+  const { publishId, reviewTitle, reviewerId, userId } = req.body;
+
+  if (!(publishId && reviewTitle && reviewerId && userId)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const publish = await publishRepository.findOne({
+    publishId,
+  });
+
+  const reviewer = await userRepository.findOne({
+    reviewerId,
+  });
+
+  const creator = await userRepository.findOne({
+    userId,
+  });
+
+  const reviewStatus = await reviewStatusRepository.findOne({
+    code: '7003',
+  });
+
+  const review = reviewRepository.create({
+    reviewTitle,
+    createTime: new Date().getTime(),
+    creator,
+    reviewer,
+    reviewStatus,
+  });
+
+  publish.review = review;
+
+  await publishRepository.save(publish);
+
+  return res.status(OK).json({
+    success: true,
+  });
+});
 /******************************************************************************
  *                                 Export Router
  ******************************************************************************/
