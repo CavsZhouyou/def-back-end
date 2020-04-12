@@ -11,6 +11,8 @@ import {
 } from '@shared/repositories';
 import { Iteration } from '@entity/Iteration';
 import { asyncForEach } from 'src/utils';
+import { Publish } from '@entity/Publish';
+import { IterationStatus } from '@entity/IterationStatus';
 
 // Init shared
 const router = Router().use(loginMW);
@@ -36,27 +38,67 @@ router.post('/getIterationList', async (req: Request, res: Response) => {
   const dataStart = (page - 1) * pageSize;
   const relations = ['app', 'creator', 'iterationStatus', 'publishes'];
 
-  if (userId)
-    queryOptions.creator = await userRepository.findOne({
-      userId,
+  if (userId) {
+    const user = await userRepository.findOne(
+      {
+        userId,
+      },
+      {
+        relations: ['createdIterations', 'createdPublishes'],
+      }
+    );
+
+    // 查询用户创建迭代
+    let originIterations: Iteration[] = [];
+    const { createdIterations, createdPublishes } = user;
+
+    // 查询用户参与迭代
+    const publishes = await publishRepository.find({
+      where: createdPublishes,
+      relations: ['iteration'],
     });
-  if (appId)
-    queryOptions.app = await appRepository.findOne({
-      appId,
-    });
-  if (iterationStatus.length >= 1)
-    queryOptions.iterationStatus = await iterationStatusRepository.findOne({
-      code: iterationStatus[0],
+    const joinedIterations = publishes.map((item: Publish) => {
+      return item.iteration;
     });
 
-  // 用户列表查询
-  // TODO: 现在为用户创建的迭代，和发布关联后需要查询用户参与的迭代
-  iterations = await iterationRepository.find({
-    where: {
-      ...queryOptions,
-    },
-    relations,
-  });
+    // 获取迭代相关信息
+    originIterations = createdIterations.concat(joinedIterations);
+    originIterations = await iterationRepository.find({
+      where: originIterations,
+      relations,
+    });
+
+    iterations = originIterations.filter((item) => {
+      if (appId && item.app.appId !== appId) {
+        return false;
+      }
+
+      if (
+        iterationStatus.length >= 1 &&
+        item.iterationStatus.code !== iterationStatus[0]
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  } else {
+    if (appId)
+      queryOptions.app = await appRepository.findOne({
+        appId,
+      });
+    if (iterationStatus.length >= 1)
+      queryOptions.iterationStatus = await iterationStatusRepository.findOne({
+        code: iterationStatus[0],
+      });
+
+    iterations = await iterationRepository.find({
+      where: {
+        ...queryOptions,
+      },
+      relations,
+    });
+  }
   total = iterations.length;
 
   if (dataStart > total) {

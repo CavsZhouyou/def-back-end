@@ -14,7 +14,6 @@ import {
 } from '@shared/repositories';
 import { App } from '@entity/App';
 import { asyncForEach } from 'src/utils';
-import app from '@server';
 
 // Init shared
 const router = Router().use(loginMW);
