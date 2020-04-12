@@ -131,6 +131,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
         publishStatus,
         publisher,
         iteration,
+        app,
       });
 
       await publishRepository.save(savedPublish);
@@ -153,6 +154,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
         publishStatus,
         publisher,
         iteration,
+        app,
       });
 
       await publishRepository.save(savedPublish);
@@ -334,34 +336,42 @@ router.post('/getAppPublishDetail', async (req: Request, res: Response) => {
   } = publish;
 
   const { userName, userAvatar } = publisher;
-  const completeReview = await reviewRepository.findOne(
-    {
-      ...review,
-    },
-    {
-      relations: ['reviewStatus'],
-    }
-  );
-  const {
-    reviewId,
-    reviewStatus: { code: reviewStatus },
-    failReason,
-  } = completeReview || {};
+  const completeReview = review
+    ? await reviewRepository.findOne(
+        {
+          ...review,
+        },
+        {
+          relations: ['reviewStatus'],
+        }
+      )
+    : null;
+
+  const publishDetail: any = {
+    publishId,
+    publisher: userName,
+    publisherAvatar: userAvatar,
+    commit,
+    createTime,
+    publishEnv: publishEnvironment.code,
+    publishStatus: publishStatus.code,
+  };
+
+  if (completeReview) {
+    const {
+      reviewId,
+      reviewStatus: { code: reviewStatus },
+      failReason,
+    } = completeReview;
+
+    publishDetail.reviewId = reviewId;
+    publishDetail.reviewStatus = reviewStatus;
+    publishDetail.failReason = failReason;
+  }
 
   return res.status(OK).json({
     success: true,
-    data: {
-      publishId,
-      publisher: userName,
-      publisherAvatar: userAvatar,
-      commit,
-      createTime,
-      publishEnv: publishEnvironment.code,
-      publishStatus: publishStatus.code,
-      reviewId,
-      reviewStatus,
-      failReason,
-    },
+    data: publishDetail,
   });
 });
 

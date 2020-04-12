@@ -10,10 +10,8 @@ import {
   userRepository,
   reviewStatusRepository,
   reviewRepository,
-  iterationRepository,
 } from '@shared/repositories';
 import { Member } from '@entity/Member';
-import app from '@server';
 import { asyncForEach } from 'src/utils';
 
 // Init shared
@@ -227,10 +225,6 @@ router.post('/getCodeReviewList', async (req: Request, res: Response) => {
     },
   });
 });
-// userId: sessionStorage.getItem('userId') || '',
-// reviewId,
-// reviewResult: '7002',
-// failReason
 
 /******************************************************************************
  *            代码审阅 - "POST/def/review/reviewPublish"
