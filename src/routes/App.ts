@@ -13,6 +13,8 @@ import {
   memberRepository,
 } from '@shared/repositories';
 import { App } from '@entity/App';
+import { asyncForEach } from 'src/utils';
+import app from '@server';
 
 // Init shared
 const router = Router().use(loginMW);
@@ -38,23 +40,69 @@ router.post('/getAppList', async (req: Request, res: Response) => {
   const dataStart = (page - 1) * pageSize;
   const relations = ['iterations', 'publishType'];
 
-  if (appName) queryOptions.appName = appName;
-  if (publishType.length >= 1)
-    queryOptions.publishType = await publishTypeRepository.findOne({
-      code: publishType[0],
-    });
-  if (userId)
-    queryOptions.creator = await userRepository.findOne({
-      userId,
+  if (userId) {
+    const user = await userRepository.findOne(
+      {
+        userId,
+      },
+      {
+        relations: ['createdApps', 'joinedApps'],
+      }
+    );
+
+    // 获取用户创建应用
+    const { createdApps, joinedApps: members } = user;
+    let joinedApps: App[] = [];
+
+    // 获取用户参与应用
+    await asyncForEach(members, async (item) => {
+      const member = await memberRepository.findOne(
+        {
+          ...item,
+        },
+        {
+          relations: ['app'],
+        }
+      );
+
+      joinedApps.push(member.app);
     });
 
-  // 用户列表查询
-  apps = await appRepository.find({
-    where: {
-      ...queryOptions,
-    },
-    relations,
-  });
+    apps = joinedApps.concat(createdApps);
+
+    apps = await appRepository.find({
+      where: apps,
+      relations,
+    });
+
+    // 根据条件过滤
+    apps = apps.filter((item) => {
+      if (appName && item.appName !== appName) {
+        return false;
+      }
+
+      if (publishType.length >= 1 && item.publishType.code !== publishType[0]) {
+        return false;
+      }
+
+      return true;
+    });
+  } else {
+    if (appName) queryOptions.appName = appName;
+    if (publishType.length >= 1)
+      queryOptions.publishType = await publishTypeRepository.findOne({
+        code: publishType[0],
+      });
+
+    // 用户列表查询
+    apps = await appRepository.find({
+      where: {
+        ...queryOptions,
+      },
+      relations,
+    });
+  }
+
   total = apps.length;
 
   if (dataStart > total) {
