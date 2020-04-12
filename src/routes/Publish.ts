@@ -335,7 +335,7 @@ router.post('/getAppPublishDetail', async (req: Request, res: Response) => {
     review,
   } = publish;
 
-  const { userName, userAvatar } = publisher;
+  const { userId, userName, userAvatar } = publisher;
   const completeReview = review
     ? await reviewRepository.findOne(
         {
@@ -349,6 +349,7 @@ router.post('/getAppPublishDetail', async (req: Request, res: Response) => {
 
   const publishDetail: any = {
     publishId,
+    publisherId: userId,
     publisher: userName,
     publisherAvatar: userAvatar,
     commit,
