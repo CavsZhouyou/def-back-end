@@ -8,6 +8,7 @@ import MemberRouter from './Member';
 import SettingRouter from './Setting';
 import DynamicRouter from './Dynamic';
 import PublishRouter from './Publish';
+import ReviewRouter from './Review';
 
 // Init router and path
 const router = Router();
@@ -22,6 +23,7 @@ router.use('/member', MemberRouter);
 router.use('/setting', SettingRouter);
 router.use('/dynamic', DynamicRouter);
 router.use('/publish', PublishRouter);
+router.use('/review', ReviewRouter);
 
 // Export the base-router
 export default router;
