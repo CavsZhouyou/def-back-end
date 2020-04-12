@@ -10,8 +10,11 @@ import {
   userRepository,
   reviewStatusRepository,
   reviewRepository,
+  iterationRepository,
 } from '@shared/repositories';
 import { Member } from '@entity/Member';
+import app from '@server';
+import { asyncForEach } from 'src/utils';
 
 // Init shared
 const router = Router().use(loginMW);
@@ -140,6 +143,121 @@ router.post('/applyCodeReview', async (req: Request, res: Response) => {
   publish.review = review;
 
   await publishRepository.save(publish);
+
+  return res.status(OK).json({
+    success: true,
+  });
+});
+
+/******************************************************************************
+ *            获取代码审阅列表 - "POST/def/review/getCodeReviewList"
+ ******************************************************************************/
+
+router.post('/getCodeReviewList', async (req: Request, res: Response) => {
+  const { appId, page, pageSize } = req.body;
+
+  if (!(appId && page && pageSize)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const app = await appRepository.find({
+    where: {
+      appId,
+    },
+    relations: ['publishes'],
+  });
+
+  let reviewList: any[] = [];
+  const { appName } = app;
+
+  const publishes = await publishRepository.find({
+    where: app.publishes,
+    relations: ['iteration', 'review'],
+  });
+
+  await asyncForEach(publishes, async (item) => {
+    if (item.review) {
+      const { iteration } = item;
+      const review = await reviewRepository.findOne(
+        {
+          ...item.review,
+        },
+        {
+          relations: ['creator', 'reviewer', 'reviewStatus'],
+        }
+      );
+      const {
+        reviewId,
+        createTime,
+        reviewTitle,
+        failReason,
+        creator,
+        reviewer,
+        reviewStatus,
+      } = review;
+      const { iterationId, iterationName, version } = iteration;
+
+      reviewList.push({
+        reviewId,
+        createTime,
+        appId,
+        appName,
+        iterationName,
+        iterationId,
+        reviewTitle,
+        version,
+        creator: creator.userName,
+        creatorAvatar: creator.userAvatar,
+        reviewer: reviewer.userName,
+        reviewerAvatar: reviewer.userAvatar,
+        reviewerId: reviewer.userId,
+        reviewStatus: reviewStatus.code,
+        failReason,
+      });
+    }
+  });
+
+  return res.status(OK).json({
+    success: true,
+    data: {
+      list: reviewList,
+    },
+  });
+});
+// userId: sessionStorage.getItem('userId') || '',
+// reviewId,
+// reviewResult: '7002',
+// failReason
+
+/******************************************************************************
+ *            代码审阅 - "POST/def/review/reviewPublish"
+ ******************************************************************************/
+
+router.post('/reviewPublish', async (req: Request, res: Response) => {
+  const { userId, reviewId, reviewResult, failReason } = req.body;
+
+  if (!(userId && reviewId && reviewResult)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const reviewStatus = await reviewStatusRepository.findOne({
+    code: reviewResult,
+  });
+
+  const review = await reviewRepository.findOne({
+    reviewId,
+  });
+
+  review.reviewStatus = reviewStatus;
+  review.failReason = failReason;
+
+  await reviewRepository.save(review);
 
   return res.status(OK).json({
     success: true,
