@@ -196,11 +196,24 @@ router.post('/createIteration', async (req: Request, res: Response) => {
   }
 
   const version = branch.split('/')[1];
+
+  const app = await appRepository.findOne({ appId });
+  const existedIteration = await iterationRepository.findOne({
+    app,
+    version,
+  });
+
+  if (existedIteration) {
+    return res.status(OK).json({
+      success: false,
+      message: '该分支已关联迭代！',
+    });
+  }
+
   const createTime = new Date().getTime();
   const endTime = '0';
   const master = 'master';
   const creator = await userRepository.findOne({ userId });
-  const app = await appRepository.findOne({ appId });
   const iterationStatus = await iterationStatusRepository.findOne({
     code: '3002',
   });
