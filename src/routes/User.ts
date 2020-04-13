@@ -44,6 +44,9 @@ router.post('/getUserList', async (req: Request, res: Response) => {
       ...queryOptions,
     },
     relations,
+    order: {
+      joinTime: 'DESC',
+    },
   });
   total = users.length;
 
@@ -102,6 +105,7 @@ router.post('/addUser', async (req: Request, res: Response) => {
   const role = await userRoleRepository.findOne({ roleId: userRoleId });
   const userAvatar = `http://hd215.api.yesapi.cn/?s=Ext.Avatar.Show&nickname=${userName}&size=500&app_key=4C389AC422864EB57101E24648435351&sign=BCF78D4C895E4054AC0B231BD1DD0524`;
   const pwdHash = bcrypt.hashSync(md5(userId), pwdSaltRounds);
+  const joinTime = new Date().getDate();
 
   const newUser = userRepository.create({
     userId,
@@ -111,6 +115,7 @@ router.post('/addUser', async (req: Request, res: Response) => {
     post,
     department,
     role,
+    joinTime,
   });
 
   await userRepository.insert(newUser);

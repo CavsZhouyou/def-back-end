@@ -36,6 +36,9 @@ export class User {
   @Column()
   pwdHash: string;
 
+  @Column()
+  joinTime: string;
+
   @ManyToOne((type) => UserRole, (userRole) => userRole.users)
   role: UserRole;
 
