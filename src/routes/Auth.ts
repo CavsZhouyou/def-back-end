@@ -56,7 +56,10 @@ router.post('/login', async (req: Request, res: Response) => {
   return res.status(OK).json({
     success: true,
     data: {
-      userInfo: user,
+      userInfo: {
+        ...user,
+        userRole: user.role.roleId,
+      },
     },
     message: '登录成功!',
   });
