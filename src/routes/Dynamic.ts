@@ -73,13 +73,15 @@ router.post('/getDynamicList', async (req: Request, res: Response) => {
       apps.push({ app: member.app });
     });
 
-    dynamics = await dynamicRepository.find({
-      where: apps,
-      relations: ['creator', 'app'],
-      order: {
-        operateTime: 'DESC',
-      },
-    });
+    if (apps.length >= 1) {
+      dynamics = await dynamicRepository.find({
+        where: apps,
+        relations: ['creator', 'app'],
+        order: {
+          operateTime: 'DESC',
+        },
+      });
+    }
   }
 
   total = dynamics.length;
