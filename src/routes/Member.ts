@@ -191,6 +191,10 @@ router.post('/addAppMember', async (req: Request, res: Response) => {
       member.role = memberRole;
       member.expiredTime = new Date().getTime() + parseInt(useTime || '');
       await memberRepository.save(member);
+
+      // 添加动态信息
+      const content = `添加了成员（${memberRole.roleName}）${userName}`;
+      addDynamic(operatorId, appId, content);
     }
   } else {
     // 新用户第一次添加
