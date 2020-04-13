@@ -14,6 +14,7 @@ import {
 } from '@shared/repositories';
 import { App } from '@entity/App';
 import { asyncForEach } from 'src/utils';
+import { Member } from '@entity/Member';
 
 // Init shared
 const router = Router().use(loginMW);
@@ -455,10 +456,27 @@ router.post('/getAppBasicInfo', async (req: Request, res: Response) => {
     }
   );
 
+  let isJoin = false;
+  let joinTime = '0';
+
+  const members = await memberRepository.find({
+    where: app.members,
+    relations: ['user'],
+  });
+
+  members.forEach((item: Member) => {
+    if (item.user.userId === userId) {
+      isJoin = true;
+      joinTime = item.joinTime;
+    }
+  });
+
   return res.status(OK).json({
     success: true,
     data: {
       ...app,
+      isJoin,
+      joinTime,
     },
   });
 });
