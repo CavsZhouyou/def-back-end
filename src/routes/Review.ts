@@ -171,6 +171,10 @@ router.post('/getCodeReviewList', async (req: Request, res: Response) => {
 
   let reviewList: any[] = [];
   let publishes: Publish[] = [];
+  let hasMore = true;
+  let total = 0;
+  const dataStart = (page - 1) * pageSize;
+  const relations = ['creator', 'reviewer', 'reviewStatus', 'publish'];
   const { appName } = app;
 
   if (app.publishes && app.publishes.length >= 1) {
@@ -180,52 +184,87 @@ router.post('/getCodeReviewList', async (req: Request, res: Response) => {
     });
   }
 
-  await asyncForEach(publishes, async (item) => {
+  publishes.forEach((item) => {
     if (item.review) {
-      const { iteration } = item;
-      const review = await reviewRepository.findOne(
-        {
-          ...item.review,
-        },
-        {
-          relations: ['creator', 'reviewer', 'reviewStatus'],
-        }
-      );
-      const {
-        reviewId,
-        createTime,
-        reviewTitle,
-        failReason,
-        creator,
-        reviewer,
-        reviewStatus,
-      } = review;
-      const { iterationId, iterationName, version } = iteration;
-
-      reviewList.push({
-        reviewId,
-        createTime,
-        appId,
-        appName,
-        iterationName,
-        iterationId,
-        reviewTitle,
-        version,
-        creator: creator.userName,
-        creatorAvatar: creator.userAvatar,
-        reviewer: reviewer.userName,
-        reviewerAvatar: reviewer.userAvatar,
-        reviewerId: reviewer.userId,
-        reviewStatus: reviewStatus.code,
-        failReason,
-      });
+      reviewList.push(item.review);
     }
+  });
+
+  reviewList = await reviewRepository.find({
+    where: reviewList,
+    relations,
+    order: {
+      createTime: 'DESC',
+    },
+  });
+
+  total = reviewList.length;
+
+  if (dataStart > total) {
+    return res.status(OK).json({
+      success: false,
+      message: '超出数据范围！',
+    });
+  } else {
+    hasMore = dataStart + pageSize < total;
+
+    if (hasMore) {
+      reviewList = reviewList.splice(dataStart, pageSize);
+    } else {
+      reviewList = reviewList.splice(dataStart);
+    }
+  }
+
+  const formattedReviewList: any[] = [];
+
+  await asyncForEach(reviewList, async (item) => {
+    const {
+      reviewId,
+      createTime,
+      reviewTitle,
+      failReason,
+      creator,
+      reviewer,
+      reviewStatus,
+    } = item;
+    const publish = await publishRepository.findOne(
+      {
+        publishId: item.publish.publishId,
+      },
+      {
+        relations: ['iteration'],
+      }
+    );
+
+    const { iterationId, iterationName, version } = publish.iteration;
+
+    formattedReviewList.push({
+      reviewId,
+      createTime,
+      appId,
+      appName,
+      iterationName,
+      iterationId,
+      reviewTitle,
+      version,
+      creator: creator.userName,
+      creatorAvatar: creator.userAvatar,
+      reviewer: reviewer.userName,
+      reviewerAvatar: reviewer.userAvatar,
+      reviewerId: reviewer.userId,
+      reviewStatus: reviewStatus.code,
+      failReason,
+    });
   });
 
   return res.status(OK).json({
     success: true,
     data: {
-      list: reviewList,
+      page,
+      pageSize,
+      hasMore,
+      total,
+      list: formattedReviewList,
     },
   });
 });
