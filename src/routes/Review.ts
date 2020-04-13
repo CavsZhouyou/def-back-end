@@ -120,7 +120,7 @@ router.post('/applyCodeReview', async (req: Request, res: Response) => {
   });
 
   const reviewer = await userRepository.findOne({
-    reviewerId,
+    userId: reviewerId,
   });
 
   const creator = await userRepository.findOne({
