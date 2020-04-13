@@ -558,6 +558,51 @@ router.post('/editBasicInfo', async (req: Request, res: Response) => {
     success: true,
   });
 });
+
+/******************************************************************************
+ *            获取应用成员角色信息 - "POST/def/app/getAppMemberRole"
+ ******************************************************************************/
+
+router.post('/getAppMemberRole', async (req: Request, res: Response) => {
+  const { userId, appId } = req.body;
+
+  if (!(userId && appId)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const app = await appRepository.findOne(
+    {
+      appId,
+    },
+    {
+      relations: ['members'],
+    }
+  );
+
+  let memberRole = '0';
+
+  const members = await memberRepository.find({
+    where: app.members,
+    relations: ['user', 'role'],
+  });
+
+  members.forEach((item: Member) => {
+    if (item.user.userId === userId) {
+      memberRole = item.role.roleId;
+    }
+  });
+
+  return res.status(OK).json({
+    success: true,
+    data: {
+      memberRole,
+    },
+  });
+});
+
 /******************************************************************************
  *                                 Export Router
  ******************************************************************************/
