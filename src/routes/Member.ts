@@ -9,6 +9,7 @@ import {
   memberRepository,
 } from '@shared/repositories';
 import { Member } from '@entity/Member';
+import { addDynamic } from 'src/utils';
 
 // Init shared
 const router = Router().use(loginMW);
@@ -148,9 +149,9 @@ router.post('/getAppMemberOptions', async (req: Request, res: Response) => {
  ******************************************************************************/
 
 router.post('/addAppMember', async (req: Request, res: Response) => {
-  const { appId, userName, useTime, role } = req.body;
+  const { operatorId, appId, userName, useTime, role } = req.body;
 
-  if (!(appId && userName && useTime && role)) {
+  if (!(operatorId && appId && userName && useTime && role)) {
     return res.status(OK).json({
       success: false,
       message: paramMissingError,
@@ -200,6 +201,10 @@ router.post('/addAppMember', async (req: Request, res: Response) => {
       app,
       user,
     });
+
+    // 添加动态信息
+    const content = `添加了成员（${memberRole.roleName}）${userName}`;
+    addDynamic(operatorId, appId, content);
 
     await memberRepository.save(savedMember);
   }
@@ -267,9 +272,9 @@ router.post('/changeMemberRights', async (req: Request, res: Response) => {
  ******************************************************************************/
 
 router.post('/deleteAppMember', async (req: Request, res: Response) => {
-  const { appId, userId } = req.body;
+  const { operatorId, appId, userId } = req.body;
 
-  if (!(appId && userId)) {
+  if (!(operatorId && appId && userId)) {
     return res.status(OK).json({
       success: false,
       message: paramMissingError,
@@ -290,10 +295,19 @@ router.post('/deleteAppMember', async (req: Request, res: Response) => {
   const app = await appRepository.findOne({
     appId,
   });
-  const member = await memberRepository.findOne({
-    app,
-    user,
-  });
+  const member = await memberRepository.findOne(
+    {
+      app,
+      user,
+    },
+    {
+      relations: ['role', 'user'],
+    }
+  );
+  const {
+    role,
+    user: { userName },
+  } = member;
 
   if (!member) {
     return res.status(OK).json({
@@ -304,6 +318,10 @@ router.post('/deleteAppMember', async (req: Request, res: Response) => {
 
   member.expiredTime = new Date().getTime();
   await memberRepository.save(member);
+
+  // 添加动态信息
+  const content = `删除了成员（${role.roleName}）${userName}`;
+  addDynamic(operatorId, appId, content);
 
   return res.status(OK).json({
     success: true,
