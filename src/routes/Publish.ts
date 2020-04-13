@@ -234,6 +234,9 @@ router.post('/getAppPublishList', async (req: Request, res: Response) => {
       ...queryOptions,
     },
     relations,
+    order: {
+      createTime: 'DESC',
+    },
   });
   total = publishes.length;
 

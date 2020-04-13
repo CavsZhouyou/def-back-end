@@ -71,6 +71,9 @@ router.post('/getIterationList', async (req: Request, res: Response) => {
       originIterations = await iterationRepository.find({
         where: originIterations,
         relations,
+        order: {
+          createTime: 'DESC',
+        },
       });
 
       iterations = originIterations.filter((item) => {
@@ -103,6 +106,9 @@ router.post('/getIterationList', async (req: Request, res: Response) => {
         ...queryOptions,
       },
       relations,
+      order: {
+        createTime: 'DESC',
+      },
     });
   }
   total = iterations.length;
@@ -140,14 +146,23 @@ router.post('/getIterationList', async (req: Request, res: Response) => {
 
     const { appId, appLogo, appName } = app;
     const { userName: creatorName, userAvatar: creatorAvatar } = creator;
-    const completePublishes = await publishRepository.find({
-      where: publishes,
-      relations: ['publishStatus'],
-    });
+
+    let completePublishes: Publish[] = [];
+
+    if (publishes.length >= 1) {
+      completePublishes = await publishRepository.find({
+        where: publishes,
+        relations: ['publishStatus'],
+      });
+    }
+
     const {
       createTime: latestPublish,
       publishStatus: { code: latestPublishStatus },
-    } = completePublishes[0];
+    } = completePublishes[0] || {
+      createTime: '0',
+      publishStatus: '0',
+    };
 
     formattedIterations.push({
       appId,

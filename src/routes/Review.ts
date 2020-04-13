@@ -162,7 +162,7 @@ router.post('/getCodeReviewList', async (req: Request, res: Response) => {
     });
   }
 
-  const app = await appRepository.find({
+  const app = await appRepository.findOne({
     where: {
       appId,
     },
