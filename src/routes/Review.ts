@@ -13,6 +13,7 @@ import {
 } from '@shared/repositories';
 import { Member } from '@entity/Member';
 import { asyncForEach } from 'src/utils';
+import { Publish } from '@entity/Publish';
 
 // Init shared
 const router = Router().use(loginMW);
@@ -169,12 +170,15 @@ router.post('/getCodeReviewList', async (req: Request, res: Response) => {
   });
 
   let reviewList: any[] = [];
+  let publishes: Publish[] = [];
   const { appName } = app;
 
-  const publishes = await publishRepository.find({
-    where: app.publishes,
-    relations: ['iteration', 'review'],
-  });
+  if (app.publishes && app.publishes.length >= 1) {
+    publishes = await publishRepository.find({
+      where: app.publishes,
+      relations: ['iteration', 'review'],
+    });
+  }
 
   await asyncForEach(publishes, async (item) => {
     if (item.review) {
