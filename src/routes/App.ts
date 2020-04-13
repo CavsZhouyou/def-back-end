@@ -13,7 +13,7 @@ import {
   memberRepository,
 } from '@shared/repositories';
 import { App } from '@entity/App';
-import { asyncForEach } from 'src/utils';
+import { asyncForEach, addDynamic } from 'src/utils';
 import { Member } from '@entity/Member';
 
 // Init shared
@@ -537,17 +537,28 @@ router.post('/editBasicInfo', async (req: Request, res: Response) => {
     });
   }
 
-  const app = await appRepository.findOne({
-    appId,
-  });
-  const user = await userRepository.findOne({
-    userId,
-  });
+  const app = await appRepository.findOne(
+    {
+      appId,
+    },
+    {
+      relations: ['productType'],
+    }
+  );
   const productType = await productTypeRepository.findOne({
     code: product,
   });
 
-  //TODO: 插入动态信息
+  //插入动态信息
+  if (app.description !== description) {
+    const content = `修改项目描述为 ${description}`;
+    await addDynamic(userId, appId, content);
+  }
+
+  if (app.productType.code !== product) {
+    const content = `修改项目产品为 ${productType.name}`;
+    await addDynamic(userId, appId, content);
+  }
 
   app.description = description;
   app.productType = productType;
