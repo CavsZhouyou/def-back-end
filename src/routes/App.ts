@@ -69,23 +69,28 @@ router.post('/getAppList', async (req: Request, res: Response) => {
 
     apps = joinedApps.concat(createdApps);
 
-    apps = await appRepository.find({
-      where: apps,
-      relations,
-    });
+    if (apps.length >= 1) {
+      apps = await appRepository.find({
+        where: apps,
+        relations,
+      });
 
-    // 根据条件过滤
-    apps = apps.filter((item) => {
-      if (appName && item.appName !== appName) {
-        return false;
-      }
+      // 根据条件过滤
+      apps = apps.filter((item) => {
+        if (appName && item.appName !== appName) {
+          return false;
+        }
 
-      if (publishType.length >= 1 && item.publishType.code !== publishType[0]) {
-        return false;
-      }
+        if (
+          publishType.length >= 1 &&
+          item.publishType.code !== publishType[0]
+        ) {
+          return false;
+        }
 
-      return true;
-    });
+        return true;
+      });
+    }
   } else {
     if (appName) queryOptions.appName = appName;
     if (publishType.length >= 1)
@@ -180,19 +185,21 @@ router.post('/getAppListByCount', async (req: Request, res: Response) => {
 
   apps = joinedApps.concat(createdApps);
 
-  apps = await appRepository.find({
-    where: apps,
-    relations,
-  });
+  if (apps.length >= 1) {
+    apps = await appRepository.find({
+      where: apps,
+      relations,
+    });
 
-  // 根据条件过滤
-  apps = apps.filter((item) => {
-    if (publishType.length >= 1 && item.publishType.code !== publishType[0]) {
-      return false;
-    }
+    // 根据条件过滤
+    apps = apps.filter((item) => {
+      if (publishType.length >= 1 && item.publishType.code !== publishType[0]) {
+        return false;
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }
   total = apps.length;
 
   if (dataStart > total) {
@@ -235,19 +242,42 @@ router.post('/getMyAppList', async (req: Request, res: Response) => {
   }
 
   let apps: App[] = [];
-  let queryOptions: any = {};
 
-  queryOptions.creator = await userRepository.findOne({
-    userId,
-  });
-
-  // 用户列表查询
-  apps = await appRepository.find({
-    select: ['appId', 'appName'],
-    where: {
-      ...queryOptions,
+  const user = await userRepository.findOne(
+    {
+      userId,
     },
+    {
+      relations: ['createdApps', 'joinedApps'],
+    }
+  );
+
+  // 获取用户创建应用
+  const { createdApps, joinedApps: members } = user;
+  let joinedApps: App[] = [];
+
+  // 获取用户参与应用
+  await asyncForEach(members, async (item) => {
+    const member = await memberRepository.findOne(
+      {
+        ...item,
+      },
+      {
+        relations: ['app'],
+      }
+    );
+
+    joinedApps.push(member.app);
   });
+
+  apps = joinedApps.concat(createdApps);
+
+  if (apps.length >= 1) {
+    apps = await appRepository.find({
+      where: apps,
+      select: ['appId', 'appName'],
+    });
+  }
 
   return res.status(OK).json({
     success: true,
