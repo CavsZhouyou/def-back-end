@@ -32,6 +32,9 @@ router.get('/getPostList', async (req: Request, res: Response) => {
     data: {
       list: postList,
     },
+    order: {
+      postId: 'ASC',
+    },
   });
 });
 
