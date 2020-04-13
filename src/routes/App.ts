@@ -362,6 +362,19 @@ router.post('/createApp', async (req: Request, res: Response) => {
     });
   }
 
+  const existedApp = await appRepository.find({
+    where: [{ appName }, { repository }],
+  });
+
+  if (existedApp.length >= 1) {
+    return res.status(OK).json({
+      success: false,
+      message: '应用名称或应用仓库已被使用！',
+    });
+  }
+
+  // TODO: 验证应用仓库合法性
+
   const onlineAddress = '暂无发布';
   const pagePrefix = '/webapp/publish';
   const codeReviewSetting = codeReviewSettingRepository.create({
