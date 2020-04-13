@@ -235,7 +235,6 @@ router.post('/getCodeReviewList', async (req: Request, res: Response) => {
         relations: ['iteration'],
       }
     );
-
     const { iterationId, iterationName, version } = publish.iteration;
 
     formattedReviewList.push({
