@@ -15,6 +15,7 @@ import {
 } from '@shared/repositories';
 import { Iteration } from '@entity/Iteration';
 import { Publish } from '@entity/Publish';
+import { addDynamic } from 'src/utils';
 
 // Init shared
 // const router = Router().use(loginMW);
@@ -45,11 +46,36 @@ router.post('/createPublish', async (req: Request, res: Response) => {
       publishEnvironment,
     },
     {
-      relations: ['publishStatus', 'review'],
+      relations: ['publishStatus', 'review', 'iteration'],
     }
   );
 
   if (publish) {
+    // 判断迭代状态
+    const iteration = await iterationRepository.findOne(
+      {
+        iterationId: publish.iteration.iterationId,
+      },
+      {
+        relations: ['iterationStatus'],
+      }
+    );
+    const { iterationStatus } = iteration;
+    switch (iterationStatus.code) {
+      case '3001':
+        return res.status(OK).json({
+          success: false,
+          message: '该迭代已完成，分支不能发布！',
+        });
+      case '3002':
+        return res.status(OK).json({
+          success: false,
+          message: '该迭代已废弃，分支不能发布！',
+        });
+      default:
+        break;
+    }
+
     switch (publish.publishStatus.code) {
       case '4003':
         const review = await reviewRepository.findOne(
@@ -136,6 +162,10 @@ router.post('/createPublish', async (req: Request, res: Response) => {
 
       await publishRepository.save(savedPublish);
 
+      // 添加动态信息
+      const content = `创建了分支 ${iteration.iterationName} 的${publishEnvironment.name}发布 ${commit}`;
+      addDynamic(userId, app.appId, content);
+
       return res.status(OK).json({
         success: false,
         data: {
@@ -158,6 +188,10 @@ router.post('/createPublish', async (req: Request, res: Response) => {
       });
 
       await publishRepository.save(savedPublish);
+
+      // 添加动态信息
+      const content = `创建了分支 ${iteration.iterationName} 的${publishEnvironment.name}发布 ${commit}`;
+      addDynamic(userId, app.appId, content);
 
       // 提交发布任务
       return res.status(OK).json({
