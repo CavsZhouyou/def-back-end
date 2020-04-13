@@ -12,7 +12,7 @@ import {
 import { Iteration } from '@entity/Iteration';
 import { asyncForEach } from 'src/utils';
 import { Publish } from '@entity/Publish';
-import { IterationStatus } from '@entity/IterationStatus';
+import { BADFLAGS } from 'dns';
 
 // Init shared
 const router = Router().use(loginMW);
@@ -50,38 +50,44 @@ router.post('/getIterationList', async (req: Request, res: Response) => {
 
     // 查询用户创建迭代
     let originIterations: Iteration[] = [];
+    let joinedIterations: Iteration[] = [];
     const { createdIterations, createdPublishes } = user;
 
     // 查询用户参与迭代
-    const publishes = await publishRepository.find({
-      where: createdPublishes,
-      relations: ['iteration'],
-    });
-    const joinedIterations = publishes.map((item: Publish) => {
-      return item.iteration;
-    });
+    if (createdPublishes.length >= 1) {
+      const publishes = await publishRepository.find({
+        where: createdPublishes,
+        relations: ['iteration'],
+      });
+      joinedIterations = publishes.map((item: Publish) => {
+        return item.iteration;
+      });
+    }
 
     // 获取迭代相关信息
     originIterations = createdIterations.concat(joinedIterations);
-    originIterations = await iterationRepository.find({
-      where: originIterations,
-      relations,
-    });
 
-    iterations = originIterations.filter((item) => {
-      if (appId && item.app.appId !== appId) {
-        return false;
-      }
+    if (originIterations.length >= 1) {
+      originIterations = await iterationRepository.find({
+        where: originIterations,
+        relations,
+      });
 
-      if (
-        iterationStatus.length >= 1 &&
-        item.iterationStatus.code !== iterationStatus[0]
-      ) {
-        return false;
-      }
+      iterations = originIterations.filter((item) => {
+        if (appId && item.app.appId !== appId) {
+          return false;
+        }
 
-      return true;
-    });
+        if (
+          iterationStatus.length >= 1 &&
+          item.iterationStatus.code !== iterationStatus[0]
+        ) {
+          return false;
+        }
+
+        return true;
+      });
+    }
   } else {
     if (appId)
       queryOptions.app = await appRepository.findOne({
