@@ -12,7 +12,7 @@ import {
   reviewRepository,
 } from '@shared/repositories';
 import { Member } from '@entity/Member';
-import { asyncForEach } from 'src/utils';
+import { asyncForEach, addDynamic } from 'src/utils';
 import { Publish } from '@entity/Publish';
 
 // Init shared
@@ -106,9 +106,9 @@ router.post('/getReviewerOptions', async (req: Request, res: Response) => {
  ******************************************************************************/
 
 router.post('/applyCodeReview', async (req: Request, res: Response) => {
-  const { publishId, reviewTitle, reviewerId, userId } = req.body;
+  const { appId, publishId, reviewTitle, reviewerId, userId } = req.body;
 
-  if (!(publishId && reviewTitle && reviewerId && userId)) {
+  if (!(appId && publishId && reviewTitle && reviewerId && userId)) {
     return res.status(OK).json({
       success: false,
       message: paramMissingError,
@@ -142,6 +142,10 @@ router.post('/applyCodeReview', async (req: Request, res: Response) => {
   publish.review = review;
 
   await publishRepository.save(publish);
+
+  // 添加动态信息
+  const content = `创建了代码审阅 ${reviewTitle} - 审阅人：${reviewer.userName}`;
+  addDynamic(userId, appId, content);
 
   return res.status(OK).json({
     success: true,
@@ -273,9 +277,9 @@ router.post('/getCodeReviewList', async (req: Request, res: Response) => {
  ******************************************************************************/
 
 router.post('/reviewPublish', async (req: Request, res: Response) => {
-  const { userId, reviewId, reviewResult, failReason } = req.body;
+  const { appId, userId, reviewId, reviewResult, failReason } = req.body;
 
-  if (!(userId && reviewId && reviewResult)) {
+  if (!(appId && userId && reviewId && reviewResult)) {
     return res.status(OK).json({
       success: false,
       message: paramMissingError,
@@ -294,6 +298,12 @@ router.post('/reviewPublish', async (req: Request, res: Response) => {
   review.failReason = failReason;
 
   await reviewRepository.save(review);
+
+  // 添加动态信息
+  const content = `${reviewResult === '7001' ? '通过了' : '未通过'}代码审阅 ${
+    review.reviewTitle
+  }`;
+  addDynamic(userId, appId, content);
 
   return res.status(OK).json({
     success: true,
