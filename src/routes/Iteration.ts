@@ -10,9 +10,8 @@ import {
   publishRepository,
 } from '@shared/repositories';
 import { Iteration } from '@entity/Iteration';
-import { asyncForEach } from 'src/utils';
+import { asyncForEach, addDynamic } from 'src/utils';
 import { Publish } from '@entity/Publish';
-import { BADFLAGS } from 'dns';
 
 // Init shared
 const router = Router().use(loginMW);
@@ -251,6 +250,10 @@ router.post('/createIteration', async (req: Request, res: Response) => {
   // 对应应用进行中的迭代数加 1
   app.progressingIterationCount = app.progressingIterationCount + 1;
   await appRepository.save(app);
+
+  // 添加动态信息
+  const content = `新建了迭代 ${iterationName}`;
+  addDynamic(userId, appId, content);
 
   return res.status(OK).json({
     success: true,
