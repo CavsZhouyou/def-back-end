@@ -458,16 +458,18 @@ router.post('/getAppBasicInfo', async (req: Request, res: Response) => {
 
   let isJoin = false;
   let joinTime = '0';
+  let memberRole = '0';
 
   const members = await memberRepository.find({
     where: app.members,
-    relations: ['user'],
+    relations: ['user', 'role'],
   });
 
   members.forEach((item: Member) => {
     if (item.user.userId === userId) {
       isJoin = true;
       joinTime = item.joinTime;
+      memberRole = item.role.roleId;
     }
   });
 
@@ -477,6 +479,7 @@ router.post('/getAppBasicInfo', async (req: Request, res: Response) => {
       ...app,
       isJoin,
       joinTime,
+      memberRole,
     },
   });
 });
