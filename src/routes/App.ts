@@ -16,7 +16,7 @@ import {
 import { App } from '@entity/App';
 import { asyncForEach, addDynamic } from 'src/utils';
 import { Member } from '@entity/Member';
-import { getBranchesRequest } from 'src/utils/requests';
+import { getBranchesRequest, getRepositoryRequest } from 'src/utils/requests';
 
 // Init shared
 const router = Router().use(loginMW);
@@ -389,7 +389,15 @@ router.post('/createApp', async (req: Request, res: Response) => {
     });
   }
 
-  // TODO: 验证应用仓库合法性
+  //验证应用仓库合法性
+  const existedRepository = await getRepositoryRequest(appName);
+
+  if (!existedRepository.id) {
+    return res.status(OK).json({
+      success: false,
+      message: '应用仓库不存在！',
+    });
+  }
 
   const onlineAddress = '暂无发布';
   const pagePrefix = '/webapp/publish';

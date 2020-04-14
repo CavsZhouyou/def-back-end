@@ -4,7 +4,7 @@
  * @TodoList: 无
  * @Date: 2020-04-14 17:29:17
  * @Last Modified by: zhouyou@werun
- * @Last Modified time: 2020-04-14 17:56:29
+ * @Last Modified time: 2020-04-14 18:16:57
  */
 const axios = require('axios');
 
@@ -40,5 +40,26 @@ export const getBranchesRequest = async (appName: string) => {
     })
     .catch((error: any) => {
       console.log(error);
+    });
+};
+
+/**
+ * 获取仓库信息
+ *
+ * @param {string} appName 应用名词
+ * @returns
+ */
+export const getRepositoryRequest = async (appName: string) => {
+  const api = `${gogsHost}/api/v1/repos/${appName}?token=${authToken}`;
+
+  return axios
+    .get(api)
+    .then((response: any) => {
+      const { data } = response;
+      return data;
+    })
+    .catch((error: any) => {
+      return {};
+      // console.log(error);
     });
 };
