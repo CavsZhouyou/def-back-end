@@ -26,9 +26,9 @@ const router = Router();
  ******************************************************************************/
 
 router.post('/createPublish', async (req: Request, res: Response) => {
-  const { branch, userId, repository, commit, publishEnv } = req.body;
+  const { branch, userId, appName, commit, publishEnv } = req.body;
 
-  if (!(branch && userId && repository && commit && publishEnv)) {
+  if (!(branch && userId && appName && commit && publishEnv)) {
     return res.status(OK).json({
       success: false,
       message: paramMissingError,
@@ -123,7 +123,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
   } else {
     const app = await appRepository.findOne(
       {
-        repository,
+        appName,
       },
       {
         relations: ['iterations'],
