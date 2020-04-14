@@ -15,7 +15,9 @@
     "@server": "dist/Server"
   },
   "dependencies": {
+    "@types/axios": "^0.14.0",
     "@types/md5": "^2.1.33",
+    "axios": "^0.19.2",
     "bcrypt": "^4.0.1",
     "command-line-args": "^5.1.1",
     "cookie-parser": "^1.4.5",

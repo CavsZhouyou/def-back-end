@@ -15,6 +15,7 @@ import {
 import { App } from '@entity/App';
 import { asyncForEach, addDynamic } from 'src/utils';
 import { Member } from '@entity/Member';
+import { getBranchesRequest } from 'src/utils/requests';
 
 // Init shared
 const router = Router().use(loginMW);
@@ -306,29 +307,31 @@ router.post('/getAppBranches', async (req: Request, res: Response) => {
     appId,
   });
 
-  const list = [
-    {
-      branchId: 1,
-      branchName: 'daily/1.0.1',
-    },
-    {
-      branchId: 2,
-      branchName: 'daily/1.0.2',
-    },
-    {
-      branchId: 3,
-      branchName: 'daily/1.0.3',
-    },
-    {
-      branchId: 4,
-      branchName: 'daily/1.0.4',
-    },
-  ];
+  const branches = await getBranchesRequest(app.appName);
+
+  // const list = [
+  //   {
+  //     branchId: 1,
+  //     branchName: 'daily/1.0.1',
+  //   },
+  //   {
+  //     branchId: 2,
+  //     branchName: 'daily/1.0.2',
+  //   },
+  //   {
+  //     branchId: 3,
+  //     branchName: 'daily/1.0.3',
+  //   },
+  //   {
+  //     branchId: 4,
+  //     branchName: 'daily/1.0.4',
+  //   },
+  // ];
 
   return res.status(OK).json({
     success: true,
     data: {
-      list,
+      list: branches,
     },
   });
 });

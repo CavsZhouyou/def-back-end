@@ -6,7 +6,7 @@ import { initRepository } from '@shared/repositories';
 import initDatabase from './initDatabase';
 
 createConnection()
-  .then(async connection => {
+  .then(async (connection) => {
     // init repositories
     initRepository();
 
@@ -18,4 +18,4 @@ createConnection()
       logger.info('Express server started on port: ' + port);
     });
   })
-  .catch(error => console.log(error));
+  .catch((error) => console.log(error));
