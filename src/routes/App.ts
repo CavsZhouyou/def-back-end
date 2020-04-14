@@ -11,6 +11,7 @@ import {
   productTypeRepository,
   memberRoleRepository,
   memberRepository,
+  iterationRepository,
 } from '@shared/repositories';
 import { App } from '@entity/App';
 import { asyncForEach, addDynamic } from 'src/utils';
@@ -308,6 +309,17 @@ router.post('/getAppBranches', async (req: Request, res: Response) => {
   });
 
   const branches = await getBranchesRequest(app.appName);
+  let unbindBranches: any[] = [];
+
+  await asyncForEach(branches, async (item) => {
+    const version = item.branchName.split('/')[1];
+    const existedIteration = await iterationRepository.findOne({
+      app,
+      version,
+    });
+
+    if (!existedIteration) unbindBranches.push(item);
+  });
 
   // const list = [
   //   {
@@ -331,7 +343,7 @@ router.post('/getAppBranches', async (req: Request, res: Response) => {
   return res.status(OK).json({
     success: true,
     data: {
-      list: branches,
+      list: unbindBranches,
     },
   });
 });
