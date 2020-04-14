@@ -166,12 +166,14 @@ router.post('/getCodeReviewList', async (req: Request, res: Response) => {
     });
   }
 
-  const app = await appRepository.findOne({
-    where: {
+  const app = await appRepository.findOne(
+    {
       appId,
     },
-    relations: ['publishes'],
-  });
+    {
+      relations: ['publishes'],
+    }
+  );
 
   let reviewList: any[] = [];
   let publishes: Publish[] = [];
@@ -194,13 +196,15 @@ router.post('/getCodeReviewList', async (req: Request, res: Response) => {
     }
   });
 
-  reviewList = await reviewRepository.find({
-    where: reviewList,
-    relations,
-    order: {
-      createTime: 'DESC',
-    },
-  });
+  if (reviewList.length >= 1) {
+    reviewList = await reviewRepository.find({
+      where: reviewList,
+      relations,
+      order: {
+        createTime: 'DESC',
+      },
+    });
+  }
 
   total = reviewList.length;
 
