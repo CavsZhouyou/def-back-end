@@ -35,6 +35,33 @@ router.post('/createPublish', async (req: Request, res: Response) => {
     });
   }
 
+  const app = await appRepository.findOne(
+    {
+      appName,
+    },
+    {
+      relations: ['iterations'],
+    }
+  );
+
+  if (!app) {
+    return res.status(OK).json({
+      success: false,
+      message: '应用不存在！',
+    });
+  }
+
+  const publisher = await userRepository.findOne({
+    userId,
+  });
+
+  if (!publisher) {
+    return res.status(OK).json({
+      success: false,
+      message: '用户不存在！',
+    });
+  }
+
   const publishEnvironment = await publishEnvironmentRepository.findOne({
     code: publishEnv,
   });
@@ -93,6 +120,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
               success: true,
               data: {
                 publishId: publish.publishId,
+                repository: app.repository + '.git',
               },
             });
           case '7002':
@@ -112,6 +140,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
           success: true,
           data: {
             publishId: publish.publishId,
+            repository: app.repository + '.git',
           },
         });
       default:
@@ -121,15 +150,6 @@ router.post('/createPublish', async (req: Request, res: Response) => {
         });
     }
   } else {
-    const app = await appRepository.findOne(
-      {
-        appName,
-      },
-      {
-        relations: ['iterations'],
-      }
-    );
-
     const iterations = await iterationRepository.find({
       where: app.iterations,
     });
@@ -138,9 +158,6 @@ router.post('/createPublish', async (req: Request, res: Response) => {
       (item: Iteration) => item.branch === branch
     )[0];
     const createTime = new Date().getTime();
-    const publisher = await userRepository.findOne({
-      userId,
-    });
     const log = logRepository.create({
       content: '无',
     });
@@ -168,9 +185,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
 
       return res.status(OK).json({
         success: false,
-        data: {
-          text: '该迭代未经过代码审阅，请创建代码审阅后发布到线上环境！',
-        },
+        message: '该迭代未经过代码审阅，请创建代码审阅后发布到线上环境！',
       });
     } else {
       const publishStatus = await publishStatusRepository.findOne({
@@ -198,6 +213,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
         success: true,
         data: {
           publishId: savedPublish.publishId,
+          repository: app.repository + '.git',
         },
       });
     }
@@ -442,6 +458,43 @@ router.post('/getAppPublishLog', async (req: Request, res: Response) => {
     data: {
       log: log.content,
     },
+  });
+});
+
+/******************************************************************************
+ *           更新发布信息 - "POST/def/publish/updateAppPublishInfo"
+ ******************************************************************************/
+router.post('/updateAppPublishInfo', async (req: Request, res: Response) => {
+  const { publishId, publishLog, publishStatus: publishStatusCode } = req.body;
+
+  if (!publishId) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const publish = await publishRepository.findOne(
+    {
+      publishId,
+    },
+    {
+      relations: ['log', 'publishStatus'],
+    }
+  );
+
+  // 信息更新
+  publish.log.content = publishLog;
+
+  const publishStatus = await publishStatusRepository.findOne({
+    code: publishStatusCode,
+  });
+  publish.publishStatus = publishStatus;
+
+  await publishRepository.save(publish);
+
+  return res.status(OK).json({
+    success: true,
   });
 });
 /***
