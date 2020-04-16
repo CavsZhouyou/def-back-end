@@ -76,6 +76,9 @@ router.post('/getAppList', async (req: Request, res: Response) => {
       apps = await appRepository.find({
         where: apps,
         relations,
+        order: {
+          createTime: 'DESC',
+        },
       });
 
       // 根据条件过滤
@@ -101,12 +104,14 @@ router.post('/getAppList', async (req: Request, res: Response) => {
         code: publishType[0],
       });
 
-    // 用户列表查询
     apps = await appRepository.find({
       where: {
         ...queryOptions,
       },
       relations,
+      order: {
+        createTime: 'DESC',
+      },
     });
   }
 
@@ -192,6 +197,9 @@ router.post('/getAppListByCount', async (req: Request, res: Response) => {
     apps = await appRepository.find({
       where: apps,
       relations,
+      order: {
+        createTime: 'DESC',
+      },
     });
 
     // 根据条件过滤
