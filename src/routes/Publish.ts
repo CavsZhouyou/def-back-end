@@ -12,6 +12,7 @@ import {
   publishRepository,
   reviewRepository,
   publishTypeRepository,
+  iterationStatusRepository,
 } from '@shared/repositories';
 import { Iteration } from '@entity/Iteration';
 import { Publish } from '@entity/Publish';
@@ -479,12 +480,14 @@ router.post('/updateAppPublishInfo', async (req: Request, res: Response) => {
       publishId,
     },
     {
-      relations: ['log', 'publishStatus'],
+      relations: ['log', 'publishStatus', 'iteration', 'publishEnvironment'],
     }
   );
 
-  // 信息更新
-  publish.log.content = publishLog;
+  const { log, publishEnvironment } = publish;
+
+  // log 信息更新
+  log.content = publishLog;
 
   const publishStatus = await publishStatusRepository.findOne({
     code: publishStatusCode,
@@ -492,6 +495,26 @@ router.post('/updateAppPublishInfo', async (req: Request, res: Response) => {
   publish.publishStatus = publishStatus;
 
   await publishRepository.save(publish);
+
+  // 线上发布成功时，将迭代状态置为已完成
+  if (publishEnvironment.code === 'online' && publishStatusCode === '4001') {
+    const iteration = await iterationRepository.findOne(
+      {
+        iterationId: publish.iteration.iterationId,
+      },
+      {
+        relations: ['iterationStatus'],
+      }
+    );
+
+    const iterationStatus = await iterationStatusRepository.findOne({
+      code: '3001',
+    });
+
+    iteration.iterationStatus = iterationStatus;
+
+    await iterationRepository.save(iteration);
+  }
 
   return res.status(OK).json({
     success: true,
