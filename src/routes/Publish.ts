@@ -94,7 +94,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
           success: false,
           message: '该迭代已完成，分支不能发布！',
         });
-      case '3002':
+      case '3003':
         return res.status(OK).json({
           success: false,
           message: '该迭代已废弃，分支不能发布！',
@@ -134,7 +134,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
               message: '代码审核中，分支不能发布！',
             });
         }
-      case '4001':
+      case '4002':
         // 提交发布任务
         return res.status(OK).json({
           success: true,
@@ -146,7 +146,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
       default:
         return res.status(OK).json({
           success: false,
-          message: '该commit 已经发布！',
+          message: '该 commit 已经发布！',
         });
     }
   } else {

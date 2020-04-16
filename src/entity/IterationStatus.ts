@@ -12,9 +12,6 @@ export class IterationStatus {
   @Column()
   name: string;
 
-  @OneToMany(
-    type => Iteration,
-    iteration => iteration.iterationStatus
-  )
+  @OneToMany((type) => Iteration, (iteration) => iteration.iterationStatus)
   iterations: Iteration[];
 }
