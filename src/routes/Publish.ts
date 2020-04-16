@@ -63,6 +63,32 @@ router.post('/createPublish', async (req: Request, res: Response) => {
     });
   }
 
+  // 判断迭代状态
+  const iteration = await iterationRepository.findOne(
+    {
+      branch,
+      app,
+    },
+    {
+      relations: ['iterationStatus'],
+    }
+  );
+  const { iterationStatus } = iteration;
+  switch (iterationStatus.code) {
+    case '3001':
+      return res.status(OK).json({
+        success: false,
+        message: '该迭代已完成，分支不能发布！',
+      });
+    case '3003':
+      return res.status(OK).json({
+        success: false,
+        message: '该迭代已废弃，分支不能发布！',
+      });
+    default:
+      break;
+  }
+
   const publishEnvironment = await publishEnvironmentRepository.findOne({
     code: publishEnv,
   });
@@ -79,31 +105,6 @@ router.post('/createPublish', async (req: Request, res: Response) => {
   );
 
   if (publish) {
-    // 判断迭代状态
-    const iteration = await iterationRepository.findOne(
-      {
-        iterationId: publish.iteration.iterationId,
-      },
-      {
-        relations: ['iterationStatus'],
-      }
-    );
-    const { iterationStatus } = iteration;
-    switch (iterationStatus.code) {
-      case '3001':
-        return res.status(OK).json({
-          success: false,
-          message: '该迭代已完成，分支不能发布！',
-        });
-      case '3003':
-        return res.status(OK).json({
-          success: false,
-          message: '该迭代已废弃，分支不能发布！',
-        });
-      default:
-        break;
-    }
-
     switch (publish.publishStatus.code) {
       case '4003':
         const review = await reviewRepository.findOne(
