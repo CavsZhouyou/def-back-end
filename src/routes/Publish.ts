@@ -41,7 +41,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
       appName,
     },
     {
-      relations: ['iterations'],
+      relations: ['iterations', 'publishes'],
     }
   );
 
@@ -50,6 +50,12 @@ router.post('/createPublish', async (req: Request, res: Response) => {
       success: false,
       message: '应用不存在！',
     });
+  }
+
+  let isFirstPublish = false;
+
+  if (app.publishes.length === 0) {
+    isFirstPublish = true;
   }
 
   const publisher = await userRepository.findOne({
@@ -123,6 +129,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
               data: {
                 publishId: publish.publishId,
                 repository: app.repository + '.git',
+                isFirstPublish,
               },
             });
           case '7002':
@@ -143,6 +150,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
           data: {
             publishId: publish.publishId,
             repository: app.repository + '.git',
+            isFirstPublish,
           },
         });
       default:
@@ -216,6 +224,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
         data: {
           publishId: savedPublish.publishId,
           repository: app.repository + '.git',
+          isFirstPublish,
         },
       });
     }
