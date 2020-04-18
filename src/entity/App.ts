@@ -51,7 +51,9 @@ export class App {
   @Column()
   progressingIterationCount: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   port: number;
 
   @OneToOne((type) => CodeReviewSetting, {
