@@ -1,7 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { OK } from 'http-status-codes';
 import { paramMissingError } from '@shared/constants';
-import { loginMW } from './middleware';
 import {
   appRepository,
   iterationRepository,
@@ -11,7 +10,6 @@ import {
   logRepository,
   publishRepository,
   reviewRepository,
-  publishTypeRepository,
   iterationStatusRepository,
 } from '@shared/repositories';
 import { Iteration } from '@entity/Iteration';
@@ -19,7 +17,6 @@ import { Publish } from '@entity/Publish';
 import { addDynamic } from 'src/utils';
 
 // Init shared
-// const router = Router().use(loginMW);
 const router = Router();
 
 /******************************************************************************
@@ -50,12 +47,6 @@ router.post('/createPublish', async (req: Request, res: Response) => {
       success: false,
       message: '应用不存在！',
     });
-  }
-
-  let isFirstPublish = false;
-
-  if (app.publishes.length === 0) {
-    isFirstPublish = true;
   }
 
   const publisher = await userRepository.findOne({
@@ -129,7 +120,6 @@ router.post('/createPublish', async (req: Request, res: Response) => {
               data: {
                 publishId: publish.publishId,
                 repository: app.repository + '.git',
-                isFirstPublish,
               },
             });
           case '7002':
@@ -150,7 +140,6 @@ router.post('/createPublish', async (req: Request, res: Response) => {
           data: {
             publishId: publish.publishId,
             repository: app.repository + '.git',
-            isFirstPublish,
           },
         });
       default:
@@ -224,7 +213,6 @@ router.post('/createPublish', async (req: Request, res: Response) => {
         data: {
           publishId: savedPublish.publishId,
           repository: app.repository + '.git',
-          isFirstPublish,
         },
       });
     }
