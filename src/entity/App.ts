@@ -34,7 +34,13 @@ export class App {
   repository: string;
 
   @Column()
+  version: string;
+
+  @Column()
   onlineAddress: string;
+
+  @Column()
+  dailyAddress: string;
 
   @Column()
   pagePrefix: string;

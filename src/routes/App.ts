@@ -407,7 +407,9 @@ router.post('/createApp', async (req: Request, res: Response) => {
     });
   }
 
-  const onlineAddress = '暂无发布';
+  const version = '';
+  const onlineAddress = '';
+  const dailyAddress = '';
   const pagePrefix = '/webapp/publish';
   const codeReviewSetting = codeReviewSettingRepository.create({
     isOpen: true,
@@ -429,6 +431,8 @@ router.post('/createApp', async (req: Request, res: Response) => {
     description,
     appLogo,
     repository,
+    version,
+    dailyAddress,
     onlineAddress,
     pagePrefix,
     createTime,

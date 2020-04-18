@@ -1,6 +1,10 @@
 import { Request, Response, Router } from 'express';
 import { OK } from 'http-status-codes';
-import { paramMissingError } from '@shared/constants';
+import {
+  paramMissingError,
+  onlineAddress,
+  dailyAddress,
+} from '@shared/constants';
 import {
   appRepository,
   iterationRepository,
@@ -497,17 +501,35 @@ router.post('/updateAppPublishInfo', async (req: Request, res: Response) => {
 
   await publishRepository.save(publish);
 
-  // 线上发布成功时，将迭代状态置为已完成
-  if (publishEnvironment.code === 'online' && publishStatusCode === '4001') {
+  // 日常发布成功时
+  if (publishEnvironment.code === 'daily' && publishStatusCode === '4001') {
     const iteration = await iterationRepository.findOne(
       {
         iterationId: publish.iteration.iterationId,
       },
       {
-        relations: ['iterationStatus'],
+        relations: ['app'],
       }
     );
 
+    // 更新日常地址
+    const { app } = iteration;
+    app.dailyAddress = `${dailyAddress}:${app.port}`;
+
+    await appRepository.save(app);
+  }
+
+  // 线上发布成功时
+  if (publishEnvironment.code === 'online' && publishStatusCode === '4001') {
+    // 将迭代状态置为已完成
+    const iteration = await iterationRepository.findOne(
+      {
+        iterationId: publish.iteration.iterationId,
+      },
+      {
+        relations: ['iterationStatus', 'app'],
+      }
+    );
     const iterationStatus = await iterationStatusRepository.findOne({
       code: '3001',
     });
@@ -515,6 +537,13 @@ router.post('/updateAppPublishInfo', async (req: Request, res: Response) => {
     iteration.iterationStatus = iterationStatus;
 
     await iterationRepository.save(iteration);
+
+    // 更新线上地址和版本号
+    const { app } = iteration;
+    app.version = iteration.version;
+    app.onlineAddress = `${onlineAddress}:${app.port}`;
+
+    await appRepository.save(app);
   }
 
   return res.status(OK).json({
