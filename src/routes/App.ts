@@ -441,6 +441,10 @@ router.post('/createApp', async (req: Request, res: Response) => {
 
   const savedApp = await appRepository.save(app);
 
+  // 根据 appId 设置应用端口号
+  savedApp.port = savedApp.appId + 9000;
+  await appRepository.save(app);
+
   // 添加应用创建者
   const memberRole = await memberRoleRepository.findOne({
     roleId: '5001',

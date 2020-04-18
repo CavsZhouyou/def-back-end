@@ -120,6 +120,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
               data: {
                 publishId: publish.publishId,
                 repository: app.repository + '.git',
+                port: app.port,
               },
             });
           case '7002':
@@ -140,6 +141,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
           data: {
             publishId: publish.publishId,
             repository: app.repository + '.git',
+            port: app.port,
           },
         });
       default:
@@ -213,6 +215,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
         data: {
           publishId: savedPublish.publishId,
           repository: app.repository + '.git',
+          port: app.port,
         },
       });
     }

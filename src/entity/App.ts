@@ -45,6 +45,9 @@ export class App {
   @Column()
   progressingIterationCount: number;
 
+  @Column()
+  port: number;
+
   @OneToOne((type) => CodeReviewSetting, {
     cascade: true,
   })
