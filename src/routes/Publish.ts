@@ -4,6 +4,7 @@ import {
   paramMissingError,
   onlineAddress,
   dailyAddress,
+  initialLog,
 } from '@shared/constants';
 import {
   appRepository,
@@ -164,7 +165,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
     )[0];
     const createTime = new Date().getTime();
     const log = logRepository.create({
-      content: '无',
+      content: initialLog,
     });
 
     if (publishEnv === 'online') {

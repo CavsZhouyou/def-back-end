@@ -3,6 +3,12 @@ export const paramMissingError = '缺少一个或多个必需参数。';
 export const loginFailedErr = 'Login failed';
 export const onlineAddress = 'http://online.def.com';
 export const dailyAddress = 'http://daily.def.com';
+export const initialLog = `
+Sending build context to Docker daemon
+
+not publish
+please use def-cli to publish webapp
+`;
 
 // Numbers
 export const pwdSaltRounds = 12;
