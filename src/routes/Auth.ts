@@ -66,6 +66,49 @@ router.post('/login', async (req: Request, res: Response) => {
 });
 
 /******************************************************************************
+ *          Login User Without JWT - "POST /api/auth/loginWithoutJWT"
+ ******************************************************************************/
+
+router.post('/loginWithoutJWT', async (req: Request, res: Response) => {
+  const { account: userId, password } = req.body;
+
+  if (!(userId && password)) {
+    return res.status(OK).json({
+      success: false,
+      message: paramMissingError,
+    });
+  }
+
+  const user = await userRepository.findOne(
+    { userId },
+    { relations: ['role'] }
+  );
+  if (!user) {
+    return res.json({
+      success: false,
+      message: '账号不存在！',
+    });
+  }
+
+  const pwdPassed = await bcrypt.compare(password, user.pwdHash);
+  if (!pwdPassed) {
+    return res.status(OK).json({
+      success: false,
+      message: '密码错误！',
+    });
+  }
+
+  return res.status(OK).json({
+    success: true,
+    data: {
+      userId: user.userId,
+      userName: user.userName,
+    },
+    message: '登录成功!',
+  });
+});
+
+/******************************************************************************
  *                      Logout - "GET /api/auth/logout"
  ******************************************************************************/
 
