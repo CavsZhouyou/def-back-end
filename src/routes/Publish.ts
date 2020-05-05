@@ -16,10 +16,12 @@ import {
   publishRepository,
   reviewRepository,
   iterationStatusRepository,
+  memberRepository,
 } from '@shared/repositories';
 import { Iteration } from '@entity/Iteration';
 import { Publish } from '@entity/Publish';
 import { addDynamic } from 'src/utils';
+import { Member } from '@entity/Member';
 
 // Init shared
 const router = Router();
@@ -43,7 +45,7 @@ router.post('/createPublish', async (req: Request, res: Response) => {
       appName,
     },
     {
-      relations: ['iterations', 'publishes'],
+      relations: ['iterations', 'publishes', 'members'],
     }
   );
 
@@ -65,6 +67,21 @@ router.post('/createPublish', async (req: Request, res: Response) => {
     });
   }
 
+  let isAppMember = false; // 是否为应用成员
+  const members = await memberRepository.find({
+    where: app.members,
+    relations: ['user'],
+  });
+  isAppMember = members.some((member: Member) => {
+    return member.user.userId === userId;
+  });
+  if (!isAppMember) {
+    return res.status(OK).json({
+      success: false,
+      message: '该用户无发布权限！',
+    });
+  }
+
   // 判断迭代状态
   const iteration = await iterationRepository.findOne(
     {
@@ -75,6 +92,14 @@ router.post('/createPublish', async (req: Request, res: Response) => {
       relations: ['iterationStatus'],
     }
   );
+
+  if (!iteration) {
+    return res.status(OK).json({
+      success: false,
+      message: '该分支未关联迭代，无法发布！',
+    });
+  }
+
   const { iterationStatus } = iteration;
   switch (iterationStatus.code) {
     case '3001':
